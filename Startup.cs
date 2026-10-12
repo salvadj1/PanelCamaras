@@ -1,6 +1,9 @@
+using System;
+using System.IO;
 using System.Linq;
-using Microsoft.AspNetCore.Builder;
 using CentroSeguridad.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,6 +24,18 @@ namespace CentroSeguridad
         {
             services.AddControllersWithViews();
             services.AddSingleton<AlmacenGrabaciones>(); // lee RutaDeGrabaciones de appsettings.json
+
+            // Cámaras XM: contraseñas cifradas con Data Protection (claves en datos/keys, protegidas con DPAPI).
+            services.AddDataProtection()
+                .SetApplicationName("PanelCamaras")
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "datos", "keys")))
+                .ProtectKeysWithDpapi(protectToLocalMachine: true);
+            services.AddSingleton<AlmacenCamaras>();
+            services.AddSingleton<PtzService>();
+            services.AddSingleton<EstadoCamaras>();
+            services.AddHostedService(sp => sp.GetRequiredService<EstadoCamaras>());
+            services.AddSingleton<Go2RtcService>();
+            services.AddHostedService(sp => sp.GetRequiredService<Go2RtcService>());
         }
 
         /// <summary>
@@ -53,14 +68,13 @@ namespace CentroSeguridad
                 else
                     ctx.Response.Redirect("/acceso?ret=" + System.Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString.Value));
             });
+            app.UsarProxyLive();  // /live/ws -> go2rtc (vídeo en directo)
             app.UseStaticFiles(); // sirve wwwroot (css, js)
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllers(); // rutas por atributo: /, /camara/{id}, /grabaciones, /api/...
             });
         }
     }

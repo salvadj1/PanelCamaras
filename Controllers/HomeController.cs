@@ -9,9 +9,10 @@ namespace CentroSeguridad.Controllers
     public class HomeController : Controller
     {
         /// <summary>
-        /// Muestra el panel principal (Views/Home/Index.cshtml).
+        /// GET /grabaciones: panel de grabaciones (Views/Home/Index.cshtml).
         /// </summary>
         /// <returns>La vista Index.</returns>
+        [HttpGet("grabaciones")]
         public IActionResult Index()
         {
             return View();

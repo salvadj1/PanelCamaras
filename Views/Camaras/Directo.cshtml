@@ -1,0 +1,42 @@
+@{
+    ViewData["Titulo"] = ViewData["CamNombre"] as string ?? "Cámara";
+    ViewData["Tab"] = "mosaico";
+    ViewData["Volver"] = "/";
+}
+<div id="carrusel" class="chips"></div>
+<div class="player" id="player" data-cam="@ViewData["CamId"]">
+  <img id="snap" alt="" hidden>
+  <video id="vid" muted playsinline autoplay></video>
+  <span class="badge live">EN VIVO</span><span class="badge q" id="bQ">SD</span>
+</div>
+<p id="estado" class="small mut" style="margin:4px 2px;min-height:18px"></p>
+
+<div class="tabs">
+  <span class="sel">Directo</span>
+  <a href="/grabaciones">Grabaciones</a>
+  <span class="dis" title="Próxima fase">Ajustes</span>
+  <span class="dis" title="Próxima fase">Info</span>
+</div>
+
+<div class="row" style="margin:4px 0">
+  <button class="chip" id="cHd" type="button">HD</button>
+  <button class="chip" id="cSd" type="button">SD</button>
+  <button class="btn tonal" id="bAudio" type="button">Sin audio</button>
+  <button class="btn tonal" id="bFoto" type="button">Foto</button>
+</div>
+<div class="ptzbox">
+  <canvas id="joy" aria-label="Joystick PTZ"></canvas>
+  <div class="grid2">
+    <button class="hold" data-cmd="ZoomTile" type="button">Z+</button>
+    <button class="hold" data-cmd="ZoomWide" type="button">Z−</button>
+    <button class="hold" data-cmd="FocusFar" type="button">F+</button>
+    <button class="hold" data-cmd="FocusNear" type="button">F−</button>
+  </div>
+</div>
+<p class="small mut" style="margin:2px 2px">Posiciones: toca para ir · mantén pulsado para guardar la actual</p>
+<div class="presets" id="presets"></div>
+@section Scripts {
+  <script src="~/js/xmcam-live.js"></script>
+  <script src="~/js/xmcam-joystick.js"></script>
+  <script src="~/js/xmcam-directo.js"></script>
+}

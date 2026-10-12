@@ -1,0 +1,21 @@
+@{
+    ViewData["Titulo"] = "PanelCamaras";
+    ViewData["Tab"] = "mosaico";
+}
+@section Acciones {
+  <div style="position:relative">
+    <button class="btn txt" id="bVista" type="button">Vista</button>
+    <div id="menuVista" class="card" hidden style="position:absolute;right:0;top:44px;z-index:30;min-width:240px;padding:6px"></div>
+  </div>
+}
+<div class="card summary" id="resumen">
+  <div><b id="kOn">–</b><span class="mut small">En línea</span></div>
+  <div><b id="kTot">–</b><span class="mut small">Cámaras</span></div>
+</div>
+<div id="avisoVideo" class="card mut small" hidden style="margin-top:8px"></div>
+<div id="mosaico" class="mosaic"></div>
+<p id="ayuda" class="mut small" hidden></p>
+@section Scripts {
+  <script src="~/js/xmcam-live.js"></script>
+  <script src="~/js/xmcam-mosaico.js"></script>
+}

@@ -1,0 +1,28 @@
+@{
+    ViewData["Titulo"] = "Añadir cámara";
+    ViewData["Tab"] = "mosaico";
+    ViewData["Volver"] = "/";
+}
+<button class="btn" id="bBuscar" type="button">Buscar en la red</button>
+<div id="hallados" style="margin-top:6px"></div>
+
+<h2 class="sec">Datos de la cámara</h2>
+<label class="field"><span>Nombre</span><input id="fNombre" autocomplete="off"></label>
+<label class="field"><span>IP</span><input id="fHost" autocomplete="off" inputmode="decimal"></label>
+<label class="field"><span>Puerto</span><input id="fPuerto" value="34567" inputmode="numeric"></label>
+<label class="field"><span>Usuario</span><input id="fUser" value="admin" autocomplete="off"></label>
+<label class="field"><span>Contraseña</span><input id="fPass" type="password" autocomplete="new-password"></label>
+<div class="row" style="margin-top:8px">
+  <button class="btn" id="bGuardar" type="button">Probar y guardar</button>
+  <button class="btn txt" id="bSinProbar" type="button">Guardar sin probar</button>
+</div>
+<div style="margin-top:6px"><button class="btn out" id="bDiag" type="button">Diagnóstico de conexión</button></div>
+<p id="msg" class="small" style="margin-top:10px"></p>
+<div id="diagBox" hidden>
+  <h2 class="sec">Diagnóstico</h2>
+  <pre class="diag card" id="diag"></pre>
+  <button class="btn txt" id="bCopiar" type="button">Copiar resultado</button>
+</div>
+@section Scripts {
+  <script src="~/js/xmcam-nueva.js"></script>
+}

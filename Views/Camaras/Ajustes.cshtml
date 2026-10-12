@@ -1,0 +1,23 @@
+@{
+    ViewData["Titulo"] = "Ajustes";
+    ViewData["Tab"] = "ajustes";
+}
+<h2 class="sec">Apariencia</h2>
+<div class="setrow">
+  <div><div>Seguir el modo del sistema</div><div class="mut small">Cambia entre claro y oscuro según tu dispositivo.</div></div>
+  <label class="switch"><input type="checkbox" id="sFollow"><i></i></label>
+</div>
+<div id="temas"></div>
+
+<h2 class="sec">Directo</h2>
+<div class="setrow">
+  <div><div>Calidad por defecto</div><div class="mut small">SD gasta menos red; HD se ve mejor.</div></div>
+  <div class="row"><button class="chip" id="sHd" type="button">HD</button><button class="chip" id="sSd" type="button">SD</button></div>
+</div>
+<div class="setrow">
+  <div><div>Mantener la pantalla encendida</div><div class="mut small">Mientras el directo está abierto.</div></div>
+  <label class="switch"><input type="checkbox" id="sKeep"><i></i></label>
+</div>
+@section Scripts {
+  <script src="~/js/xmcam-ajustes.js"></script>
+}
