@@ -28,7 +28,7 @@
   }
   /** Columnas que dan las casillas 16:9 más grandes para el número de cámaras en el espacio libre de la ventana. */
   function mejorAjuste(){
-    const total = Math.max(1, cams.length + 1);                    // cámaras + casilla de añadir
+    const total = Math.max(1, cams.length);
     const m = $('mosaico'), r = m.getBoundingClientRect();
     const W = Math.max(200, m.clientWidth || window.innerWidth), H = Math.max(160, window.innerHeight - (r.top || 160) - 40);
     const max = window.innerWidth < 600 ? 2 : 8;
@@ -73,10 +73,6 @@
       el.addEventListener('click', () => { if (largo) return; if (secundaria){ featured = c.id; render(); aplicarEstado(); } else location.href = '/camara/' + c.id; });
       m.appendChild(el);
     });
-    const add = document.createElement('a');
-    add.className = 'tile add'; add.href = '/camaras/nueva'; add.style.gridColumn = 'span 1';
-    add.innerHTML = '<div><b>+</b><span class="mut small">Añadir cámara</span></div>';
-    m.appendChild(add);
     $('ayuda').hidden = !cams.length;
     $('ayuda').textContent = layout === 2
       ? 'Toca la principal para abrir el directo, una miniatura para ponerla de principal · mantén pulsado para borrar.'

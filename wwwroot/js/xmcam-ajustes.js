@@ -22,3 +22,11 @@
   $('sKeep').onchange = e => store.set('keepOn', e.target.checked);
   drawThemes(); drawStream();
 })();
+
+// Estado de la conexión (certificado) en la sección de seguridad.
+(function(){
+  const el = document.getElementById('certEstado'); if (!el) return;
+  el.textContent = location.protocol === 'https:'
+    ? 'Conexión segura (HTTPS) activa en este equipo.'
+    : 'Esta página va por HTTP sin cifrar. Instala el certificado y abre la dirección https.';
+})();

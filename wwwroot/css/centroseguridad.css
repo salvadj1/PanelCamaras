@@ -20,6 +20,8 @@
   header .ib{padding:3px 6px}
   .logo{display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px;color:var(--acc)}
   .logo span{color:var(--fg)}
+  .gnav{display:flex;gap:2px}
+  .gnav .ib{padding:3px 6px;text-decoration:none}
   .search{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--bd);border-radius:8px;padding:0 10px;color:var(--mut);min-width:220px}
   .search input{background:none;border:0;padding:3px 0;width:100%;outline:none}
   #stat{color:var(--mut);font-size:12px}

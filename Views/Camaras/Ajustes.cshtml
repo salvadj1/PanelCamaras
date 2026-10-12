@@ -19,6 +19,16 @@
   <div><div>Mantener la pantalla encendida</div><div class="mut small">Mientras el directo está abierto.</div></div>
   <label class="switch"><input type="checkbox" id="sKeep"><i></i></label>
 </div>
+<h2 class="sec">Certificado de seguridad</h2>
+<div class="card">
+  <div id="certEstado" class="small mut" style="margin-bottom:8px"></div>
+  <div class="row">
+    <a class="btn tonal" href="/acceso?ret=/ajustes" style="text-decoration:none">Asistente de instalación</a>
+    <a class="btn out" href="/certificado.crt" style="text-decoration:none">Descargar .crt</a>
+    <a class="btn out" href="/instalar-certificado.bat" style="text-decoration:none">Instalador de Windows (.bat)</a>
+  </div>
+  <p class="small mut" style="margin:8px 0 0">Instalarlo en este equipo evita el aviso de "conexión no segura" y activa las funciones que exigen HTTPS (reproductor de clips).</p>
+</div>
 @section Scripts {
   <script src="~/js/xmcam-ajustes.js"></script>
 }
