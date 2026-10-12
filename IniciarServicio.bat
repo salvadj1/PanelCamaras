@@ -33,14 +33,16 @@ if errorlevel 1 (
     sc config "%SVC%" binPath= "\"%EXE%\"" start= auto >nul
 )
 
-rem Regla de firewall para acceder desde otros equipos (TCP 5000, entrada)
+rem Regla de firewall para acceder desde otros equipos (TCP 7000 y 7001, entrada)
 rem (se elimina tambien la regla con el nombre antiguo, si existiera)
 netsh advfirewall firewall delete rule name="Centro de Seguridad (5000)" >nul 2>&1
 netsh advfirewall firewall delete rule name="PanelCamaras (5000)" >nul 2>&1
 netsh advfirewall firewall delete rule name="PanelCamaras (5001)" >nul 2>&1
-netsh advfirewall firewall add rule name="PanelCamaras (5000)" dir=in action=allow protocol=TCP localport=5000 >nul
-netsh advfirewall firewall add rule name="PanelCamaras (5001)" dir=in action=allow protocol=TCP localport=5001 >nul
-if errorlevel 1 ( echo Aviso: no se pudo crear la regla de firewall. ) else ( echo Reglas de firewall creadas: puertos 5000 y 5001. )
+netsh advfirewall firewall delete rule name="PanelCamaras (7000)" >nul 2>&1
+netsh advfirewall firewall delete rule name="PanelCamaras (7001)" >nul 2>&1
+netsh advfirewall firewall add rule name="PanelCamaras (7000)" dir=in action=allow protocol=TCP localport=7000 >nul
+netsh advfirewall firewall add rule name="PanelCamaras (7001)" dir=in action=allow protocol=TCP localport=7001 >nul
+if errorlevel 1 ( echo Aviso: no se pudo crear la regla de firewall. ) else ( echo Reglas de firewall creadas: puertos 7000 y 7001. )
 
 rem Reinicio automatico ante fallos (1 min, 3 veces)
 sc failure "%SVC%" reset= 86400 actions= restart/60000/restart/60000/restart/60000 >nul
@@ -54,6 +56,6 @@ if errorlevel 1 (
 )
 
 echo.
-echo Listo. Abre: http://localhost:5000
-echo Desde otros equipos: https://IP-DE-ESTE-PC:5001 (aceptar el aviso del certificado la primera vez) (usa ipconfig para ver la IP)
+echo Listo. Abre: http://localhost:7000
+echo Desde otros equipos: https://IP-DE-ESTE-PC:7001 (aceptar el aviso del certificado la primera vez) (usa ipconfig para ver la IP)
 pause

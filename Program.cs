@@ -37,14 +37,14 @@ namespace CentroSeguridad
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     // Escucha en todas las interfaces de red (no solo localhost):
-                    //  - HTTP  5000: redirige a HTTPS a los equipos remotos.
-                    //  - HTTPS 5001: necesario para WebCodecs (reproductor) en equipos remotos,
+                    //  - HTTP  7000: redirige a HTTPS a los equipos remotos.
+                    //  - HTTPS 7001: necesario para WebCodecs (reproductor) en equipos remotos,
                     //    ya que los navegadores solo lo habilitan en contexto seguro.
                     // El certificado autofirmado se crea la primera vez junto al .exe (PanelCamaras.pfx).
                     webBuilder.ConfigureKestrel(k =>
                     {
-                        k.ListenAnyIP(5000);
-                        k.ListenAnyIP(5001, o => o.UseHttps(CertificadoAutofirmado.ObtenerOCrear(
+                        k.ListenAnyIP(7000);
+                        k.ListenAnyIP(7001, o => o.UseHttps(CertificadoAutofirmado.ObtenerOCrear(
                             Path.Combine(AppContext.BaseDirectory, "PanelCamaras.pfx"), "panelcamaras")));
                     });
                     webBuilder.UseStartup<Startup>();
