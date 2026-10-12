@@ -34,9 +34,11 @@
 <nav class="navbar" aria-label="Principal">
   <a href="/" class="@(tab == "mosaico" ? "sel" : "")"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Mosaico</a>
   <a href="/grabaciones" class="@(tab == "grabaciones" ? "sel" : "")"><svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10z"/></svg>Grabaciones</a>
+  <a href="/eventos" class="@(tab == "eventos" ? "sel" : "")"><svg viewBox="0 0 24 24"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-3.1-1.6-5.6-4.5-6.3V4a1.5 1.5 0 0 0-3 0v.7C7.6 5.4 6 7.9 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>Eventos</a>
   <a href="/ajustes" class="@(tab == "ajustes" ? "sel" : "")"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.6 7.6 0 0 0-1.7-1l-.4-2.6h-4l-.4 2.6c-.6.3-1.2.6-1.7 1l-2.5-1-2 3.5L4.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>Ajustes</a>
 </nav>
 <script src="~/js/xmcam.js"></script>
+<script src="~/js/xmcam-avisos.js"></script>
 @RenderSection("Scripts", required: false)
 </body>
 </html>

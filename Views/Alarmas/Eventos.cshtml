@@ -1,0 +1,17 @@
+@{
+    Layout = "_Camaras";
+    ViewData["Titulo"] = "Eventos";
+    ViewData["Tab"] = "eventos";
+}
+@section Acciones {
+  <a class="btn txt" href="/reglas" style="text-decoration:none">Reglas</a>
+  <button class="btn txt" id="bBorrar" type="button">Borrar</button>
+}
+<div class="card small" id="avisoNotif" hidden style="margin-bottom:8px">
+  <div>Recibe avisos del navegador cuando una regla notifique.</div>
+  <button class="btn tonal" id="bNotif" type="button" style="margin-top:6px">Activar avisos</button>
+</div>
+<div id="lista"><p class="mut">Cargando…</p></div>
+@section Scripts {
+  <script src="~/js/xmcam-eventos.js"></script>
+}

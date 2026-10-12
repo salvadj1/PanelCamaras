@@ -33,6 +33,10 @@ namespace CentroSeguridad
             services.AddSingleton<AlmacenCamaras>();
             services.AddSingleton<PtzService>();
             services.AddSingleton<ControlCamaras>();
+            services.AddSingleton<CentroSeguridad.Services.Alarmas.AlmacenReglas>();
+            services.AddSingleton<CentroSeguridad.Services.Alarmas.MotorReglas>();
+            services.AddSingleton<CentroSeguridad.Services.Alarmas.ServicioAlarmas>();
+            services.AddHostedService(sp => sp.GetRequiredService<CentroSeguridad.Services.Alarmas.ServicioAlarmas>());
             services.AddSingleton<EstadoCamaras>();
             services.AddHostedService(sp => sp.GetRequiredService<EstadoCamaras>());
             services.AddSingleton<Go2RtcService>();

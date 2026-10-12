@@ -119,3 +119,17 @@
     setInterval(previas, 30000);
   })();
 })();
+
+// Resumen de alarmas: eventos de hoy y perfil activo (se actualiza cada 15 s).
+(function(){
+  const { $, api } = XM;
+  async function act(){
+    try {
+      const [ev, rg] = await Promise.all([api('/api/eventos'), api('/api/reglas')]);
+      const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+      $('kEv').textContent = ev.filter(e => e.hora >= hoy.getTime()).length;
+      $('kPerfil').textContent = rg.perfilActivo;
+    } catch (_) {}
+  }
+  act(); setInterval(act, 15000);
+})();
