@@ -13,6 +13,7 @@
   function ir(p){
     Object.keys(P).forEach(k => P[k].hidden = k !== p);
     $('tabs').querySelectorAll('[data-p]').forEach(a => a.classList.toggle('sel', a.dataset.p === p));
+    $('sheet').classList.toggle('sinptz', p !== 'directo');   // fuera del directo solo queda la fila de iconos
     if (p === 'info' && !infoCargada) cargarInfo();
   }
   $('tabs').querySelectorAll('[data-p]').forEach(a => a.onclick = e => { e.preventDefault(); ir(a.dataset.p); });
