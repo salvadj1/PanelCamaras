@@ -79,6 +79,9 @@ namespace CentroSeguridad.Services
             }
         }
 
+        /// <summary>Reinicia go2rtc (regenera la configuración y lo vuelve a lanzar).</summary>
+        public void Reiniciar() { try { _cambio.Release(); } catch (Exception) { } }
+
         /// <summary>¿Es <paramref name="src"/> un nombre de stream válido de una cámara existente?</summary>
         public bool StreamValido(string src)
         {

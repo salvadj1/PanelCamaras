@@ -1,6 +1,6 @@
 /**
  * Mosaico de cámaras (equivale a HomeScreen.kt): resumen, 4 distribuciones, estado en línea cada 4 s,
- * vista previa por captura cada 30 s, directo silenciado (stream SD) en las casillas, tocar = abrir directo,
+ * vista previa por captura cada 30 s, directo silenciado (HD o SD según Ajustes) en las casillas, tocar = abrir directo,
  * mantener pulsado = borrar, última casilla = añadir cámara.
  */
 (function(){
@@ -79,6 +79,12 @@
       : 'Toca una cámara para abrir el directo · mantén pulsado para borrarla.';
   }
 
+  /** Stream de las casillas: "hd" o "sd". Ajuste "auto" (por defecto): HD hasta 4 cámaras, SD con más para no saturar red ni CPU. */
+  function calidadMosaico(){
+    const q = store.get('mosaicoQ', 'auto');
+    return q === 'hd' || q === 'sd' ? q : (cams.length <= 4 ? 'hd' : 'sd');
+  }
+
   /** Actualiza puntos de estado, vídeo en directo y resumen sin redibujar. */
   function aplicarEstado(){
     const on = cams.filter(c => c.online === true).length;
@@ -92,7 +98,7 @@
       const quiere = c.online === true && t.live && video.disponible && XmLive.soportado();
       if (quiere && !players.has(c.id)){
         t.vid.hidden = false;
-        const p = new XmLive(t.vid, c.id + '_sd', { onFrame: () => { t.img.hidden = true; t.nopic.hidden = true; } });
+        const p = new XmLive(t.vid, c.id + '_' + calidadMosaico(), { onFrame: () => { t.img.hidden = true; t.nopic.hidden = true; } });
         players.set(c.id, p); p.start();
       } else if (!quiere && players.has(c.id)){
         players.get(c.id).stop(); players.delete(c.id); t.vid.hidden = true;

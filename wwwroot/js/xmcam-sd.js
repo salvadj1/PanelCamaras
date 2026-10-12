@@ -1,6 +1,8 @@
 /**
  * Grabaciones de la tarjeta SD de una cámara (equivale a PlaybackScreen.kt + ClipPlayerScreen.kt): selector de 7 días,
- * rejilla de clips con miniatura (foto de alarma si existe, si no el primer fotograma del clip) y reproductor.
+ * rejilla de clips con miniatura (foto de alarma si existe; si no, la guardada en el servidor, y si tampoco, el primer
+ * fotograma del clip, que el navegador genera una vez y sube al servidor para todos los equipos) y reproductor.
+ * Enlace directo: /camara/{id}/sd?t=<ms> abre el clip de ese instante (lo usan las alertas).
  */
 (function(){
   const { $, esc, api, toast } = XM;
@@ -16,11 +18,17 @@
   /** Motivo según la etiqueta del nombre de archivo: [M] movimiento, [A] alarma, [H] manual, [R] continua. */
   const motivo = n => ({ M: 'Movimiento', A: 'Alarma', H: 'Manual', R: 'Grabación continua' }[((/\[([A-Za-z])\]/.exec(n || '') || [])[1] || '').toUpperCase()] || 'Grabación');
 
-  // ---- caché de miniaturas en IndexedDB
-  const idb = () => new Promise((res, rej) => { const r = indexedDB.open('xmcam', 1); r.onupgradeneeded = () => r.result.createObjectStore('th'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-  const thGet = async k => { try { const db = await idb(); return await new Promise(res => { const q = db.transaction('th').objectStore('th').get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(null); }); } catch (_) { return null; } };
-  const thSet = async (k, v) => { try { const db = await idb(); db.transaction('th', 'readwrite').objectStore('th').put(v, k); } catch (_) {} };
-  const thKey = f => `${camId}|${f.BeginTime}`;
+  // ---- miniaturas guardadas en el servidor (compartidas por todos los equipos)
+  const miniUrl = f => `/api/camaras/${camId}/sd/mini?begin=${encodeURIComponent(f.BeginTime)}`;
+  /** Intenta cargar la miniatura del servidor. Devuelve true si existe (y ya está puesta en la casilla). */
+  const probar = (f, i) => new Promise(res => {
+    const im = new Image(); im.alt = '';
+    im.onload = () => { const el = $('th' + i); if (el) el.replaceChildren(im); res(true); };
+    im.onerror = () => res(false);
+    im.src = miniUrl(f);
+  });
+  /** Sube al servidor la miniatura generada para que no haya que repetirla. Los fallos se ignoran. */
+  const subirMini = (f, blob) => fetch(miniUrl(f), { method: 'PUT', body: blob }).catch(() => {});
 
   // ---- días
   const dias = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d; });
@@ -28,7 +36,7 @@
   $('dias').querySelectorAll('.chip').forEach(b => b.onclick = () => elegirDia(+b.dataset.i));
 
   async function elegirDia(i){
-    if (genAbort) genAbort.abort();
+    genGen++; if (genAbort) genAbort.abort();
     $('dias').querySelectorAll('.chip').forEach((b, k) => b.classList.toggle('sel', k === i));
     dia = ymd(dias[i]); $('msg').textContent = 'Cargando…'; $('clips').innerHTML = ''; $('gen').hidden = true;
     try {
@@ -53,23 +61,30 @@
       return `<div class="sdc" data-i="${i}"><div class="th" id="th${i}">${foto ? `<img src="${foto}" alt="">` : 'Sin miniatura'}</div><div class="in"><div>${esc(f.BeginTime.slice(11))}</div><div class="mut">${esc(motivo(f.FileName))} · ${fmtDur(durSeg(f))}</div></div></div>`;
     }).join('');
     $('clips').querySelectorAll('.sdc').forEach(c => c.onclick = () => abrir(archivos[+c.dataset.i]));
-    archivos.forEach(async (f, i) => { if (fotoEvento(f)) return; const b = await thGet(thKey(f)); if (b) ponerMini(i, b); });
   }
-  const ponerMini = (i, blob) => { const el = $('th' + i); if (el) el.innerHTML = `<img alt="" src="${URL.createObjectURL(blob)}">`; };
 
-  /** Genera, una a una, las miniaturas que faltan (máx. 30) descargando solo el principio de cada clip. */
+  /** Busca las miniaturas del servidor y genera, una a una, las que falten (descargando solo el principio de cada clip). */
   async function generar(){
-    if (!window.VideoDecoder) return;
     const mi = ++genGen;
-    const pend = [];
-    for (let i = 0; i < archivos.length && pend.length < 30; i++) if (!fotoEvento(archivos[i]) && !(await thGet(thKey(archivos[i])))) pend.push(i);
-    if (!pend.length || mi !== genGen) return;
+    if (genAbort) genAbort.abort();
     genAbort = new AbortController(); const sg = genAbort.signal;
+    const pend = [];
+    for (let i = 0; i < archivos.length; i++){
+      if (fotoEvento(archivos[i])) continue;
+      if (mi !== genGen) return;
+      if (!(await probar(archivos[i], i))) pend.push(i);
+    }
+    if (!pend.length || mi !== genGen || !window.VideoDecoder) return;
     $('gen').hidden = false; $('genReint').hidden = true; $('genBar').max = pend.length; $('genBar').value = 0;
     let fallos = 0, hechos = 0;
     for (const i of pend){
       if (sg.aborted || mi !== genGen) return;
-      try { const b = await XmClip.miniatura(camId, archivos[i], sg); await thSet(thKey(archivos[i]), b); ponerMini(i, b); fallos = 0; }
+      try {
+        const b = await XmClip.miniatura(camId, archivos[i], sg);
+        await subirMini(archivos[i], b);
+        await probar(archivos[i], i);          // se muestra la copia del servidor (no se crean URLs temporales)
+        fallos = 0;
+      }
       catch (x) { if (sg.aborted) return; if (++fallos >= 2){ $('genTxt').textContent = 'No se pudieron generar las miniaturas (la cámara o el navegador no pudieron leer el inicio de los clips).'; $('genReint').hidden = false; return; } }
       $('genBar').value = ++hechos; $('genTxt').textContent = `Generando miniaturas ${hechos}/${pend.length}…`;
     }
@@ -78,7 +93,7 @@
   $('genReint').onclick = generar;
 
   // ---- reproductor
-  async function abrir(f){
+  async function abrir(f, seek){
     if (genAbort) genAbort.abort();      // la cámara solo atiende una descarga a la vez
     actual = f; $('cTitulo').textContent = `${f.BeginTime.slice(11)} · ${motivo(f.FileName)}`;
     $('cMsg').textContent = 'Descargando… 0 MB'; $('cPos').value = 0; $('cTiempo').textContent = '0:00 / ' + fmtDur(durSeg(f));
@@ -90,6 +105,7 @@
       $('cMsg').textContent = 'Preparando…';
       player = new XmClip.Player($('cv'), raw, durSeg(f) || 30, ev => estado(ev));
       await player.iniciar();
+      if (seek > 0) player.saltar(seek);   // llegada desde una alerta: unos segundos antes del evento
       $('cMsg').textContent = ''; $('cMute').disabled = !player.tieneAudio; $('cMute').textContent = player.tieneAudio ? 'Audio' : 'Sin audio';
       $('cPlay').textContent = 'Pausa';
     } catch (x) { if (!descAbort.signal.aborted) $('cMsg').textContent = x.message; }
@@ -125,5 +141,18 @@
   $('dlgClip').addEventListener('cancel', e => { e.preventDefault(); cerrar(); });
   window.addEventListener('pagehide', () => { if (genAbort) genAbort.abort(); if (descAbort) descAbort.abort(); });
 
-  elegirDia(0);
+    /** Enlace desde una alerta (?t=ms): abre el día y el clip de ese instante; si no hay grabación, ofrece el directo. */
+  async function desdeAlerta(t){
+    const d0 = new Date(); d0.setHours(0, 0, 0, 0);
+    const i = Math.round((d0 - new Date(new Date(t).setHours(0, 0, 0, 0))) / 86400000);
+    if (i < 0 || i > 6){ await elegirDia(0); sinClip(); return; }
+    await elegirDia(i);
+    const f = archivos.find(x => t >= ms(x.BeginTime) - MARGEN && t <= ms(x.EndTime) + MARGEN);
+    if (!f){ sinClip(); return; }
+    abrir(f, Math.max(0, (t - ms(f.BeginTime)) / 1000 - 3));
+  }
+  const sinClip = () => { $('msg').innerHTML = `No hay grabación en la SD de ese momento. <a href="/camara/${esc(camId)}">Ver en directo</a>`; };
+
+  const t = parseInt(new URLSearchParams(location.search).get('t'));
+  if (t > 0) desdeAlerta(t); else elegirDia(0);
 })();

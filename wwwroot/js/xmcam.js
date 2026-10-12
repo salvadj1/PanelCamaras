@@ -23,11 +23,12 @@ const XM = (() => {
 
   let tt;
   /** Aviso breve en pantalla. */
-  function toast(msg){
+  function toast(msg, href){
     let t = $('xmToast');
     if (!t){ t = document.createElement('div'); t.id = 'xmToast'; t.className = 'toast'; document.body.appendChild(t); }
     t.textContent = msg; t.hidden = false;
-    clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 2600);
+    t.style.cursor = href ? 'pointer' : ''; t.onclick = href ? () => { location.href = href; } : null;   // con href, tocar el aviso abre ese enlace
+    clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, href ? 9000 : 2600);
   }
 
   /** Diálogo de confirmación. Devuelve una promesa con true/false. */

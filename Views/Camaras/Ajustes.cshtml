@@ -3,31 +3,89 @@
     ViewData["Titulo"] = "Ajustes";
     ViewData["Tab"] = "ajustes";
 }
-<h2 class="sec">Apariencia</h2>
+<nav class="ajnav" aria-label="Secciones de ajustes">
+  <a class="chip" href="#general">General</a>
+  <a class="chip" href="#video">Vídeo</a>
+  <a class="chip" href="#avisos">Avisos</a>
+  <a class="chip" href="#almacen">Almacenamiento</a>
+  <a class="chip" href="#red">Red y certificado</a>
+  <a class="chip" href="#sistema">Sistema</a>
+  <a class="chip" href="#copia">Copia de seguridad</a>
+</nav>
+
+<h2 class="sec ajsec" id="general">General</h2>
 <div class="setrow">
   <div><div>Seguir el modo del sistema</div><div class="mut small">Cambia entre claro y oscuro según tu dispositivo.</div></div>
   <label class="switch"><input type="checkbox" id="sFollow"><i></i></label>
 </div>
 <div id="temas"></div>
 
-<h2 class="sec">Directo</h2>
+<h2 class="sec ajsec" id="video">Vídeo</h2>
 <div class="setrow">
-  <div><div>Calidad por defecto</div><div class="mut small">SD gasta menos red; HD se ve mejor.</div></div>
+  <div><div>Calidad del directo (una cámara)</div><div class="mut small">SD gasta menos red; HD se ve mejor.</div></div>
   <div class="row"><button class="chip" id="sHd" type="button">HD</button><button class="chip" id="sSd" type="button">SD</button></div>
+</div>
+<div class="setrow">
+  <div><div>Calidad del mosaico</div><div class="mut small">Automático: HD hasta 4 cámaras y SD con más, para no saturar la red ni el equipo.</div></div>
+  <div class="row"><button class="chip" id="mAuto" type="button">Auto</button><button class="chip" id="mHd" type="button">HD</button><button class="chip" id="mSd" type="button">SD</button></div>
 </div>
 <div class="setrow">
   <div><div>Mantener la pantalla encendida</div><div class="mut small">Mientras el directo está abierto.</div></div>
   <label class="switch"><input type="checkbox" id="sKeep"><i></i></label>
 </div>
-<h2 class="sec">Certificado de seguridad</h2>
+
+<h2 class="sec ajsec" id="avisos">Avisos</h2>
+<div class="setrow">
+  <div><div>Avisos de alarma en este navegador</div><div class="mut small">Al tocar un aviso se abre el vídeo del momento.</div></div>
+  <label class="switch"><input type="checkbox" id="sAvisos"><i></i></label>
+</div>
+<div class="setrow">
+  <div><div>Notificaciones del sistema</div><div class="mut small" id="notifEstado"></div></div>
+  <div class="row"><button class="btn tonal" id="bNotif" type="button">Permitir</button><button class="btn out" id="bProbar" type="button">Probar</button></div>
+</div>
+<div class="setrow">
+  <div><div>Foto automática en cada alarma</div><div class="mut small">Se guarda en el servidor, para todos los equipos.</div></div>
+  <label class="switch"><input type="checkbox" id="sFotoAuto"><i></i></label>
+</div>
+<div class="setrow">
+  <div><div>Perfil de alarmas activo</div><div class="mut small">Las reglas pueden aplicarse solo en un perfil.</div></div>
+  <select class="inp" id="sPerfil" aria-label="Perfil activo"></select>
+</div>
+<div class="row" style="margin:6px 0"><a class="btn tonal" href="/reglas" style="text-decoration:none">Reglas</a><a class="btn out" href="/eventos" style="text-decoration:none">Historial de eventos</a></div>
+
+<h2 class="sec ajsec" id="almacen">Almacenamiento</h2>
 <div class="card">
-  <div id="certEstado" class="small mut" style="margin-bottom:8px"></div>
+  <div class="kv" id="kvAlm">Cargando…</div>
+  <div class="row" style="margin-top:10px"><button class="btn out" id="bMini" type="button">Borrar miniaturas de la SD</button></div>
+  <p class="small mut" style="margin:8px 0 0">Las miniaturas se vuelven a crear solas al abrir las grabaciones de una cámara. Las rutas de grabaciones se definen en appsettings.json del servidor.</p>
+</div>
+
+<h2 class="sec ajsec" id="red">Red y certificado</h2>
+<div class="card">
+  <div class="kv" id="kvRed"></div>
+  <div id="certEstado" class="small mut" style="margin:10px 0 8px"></div>
   <div class="row">
     <a class="btn tonal" href="/acceso?ret=/ajustes" style="text-decoration:none">Asistente de instalación</a>
     <a class="btn out" href="/certificado.crt" style="text-decoration:none">Descargar .crt</a>
     <a class="btn out" href="/instalar-certificado.bat" style="text-decoration:none">Instalador de Windows (.bat)</a>
   </div>
   <p class="small mut" style="margin:8px 0 0">Instalarlo en este equipo evita el aviso de "conexión no segura" y activa las funciones que exigen HTTPS (reproductor de clips).</p>
+</div>
+
+<h2 class="sec ajsec" id="sistema">Sistema</h2>
+<div class="card">
+  <div class="kv" id="kvSis">Cargando…</div>
+  <div class="row" style="margin-top:10px"><button class="btn tonal" id="bGo2rtc" type="button">Reiniciar conversor de vídeo</button></div>
+</div>
+
+<h2 class="sec ajsec" id="copia">Copia de seguridad</h2>
+<div class="card">
+  <p class="small mut" style="margin:0 0 8px">Guarda las reglas, los perfiles y las preferencias de esta web en un archivo. Las cámaras y sus contraseñas no se incluyen.</p>
+  <div class="row">
+    <button class="btn tonal" id="bExp" type="button">Exportar copia</button>
+    <button class="btn out" id="bImp" type="button">Importar copia</button>
+    <input type="file" id="fImp" accept="application/json,.json" hidden>
+  </div>
 </div>
 @section Scripts {
   <script src="~/js/xmcam-ajustes.js"></script>

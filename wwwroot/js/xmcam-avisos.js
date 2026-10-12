@@ -17,9 +17,15 @@
       else if (l.length){
         ultimo = Math.max(ultimo, ...l.map(e => e.id));
         l.filter(e => e.notificar).reverse().forEach(e => {
-          const t = `${e.camara}: ${e.texto}`;
-          XM.toast('🔔 ' + t);
-          try { if (window.Notification && Notification.permission === 'granted') new Notification(t, { body: new Date(e.hora).toLocaleTimeString(), icon: e.foto || undefined }); } catch (_) {}
+          if (XM.store.get('avisos', 'true') !== 'true') return;   // avisos desactivados en Ajustes
+          const t = `${e.camara}: ${e.texto}`, url = `/camara/${e.camaraId}/sd?t=${e.hora}`;   // tocar el aviso abre el vídeo
+          XM.toast('🔔 ' + t, url);
+          try {
+            if (window.Notification && Notification.permission === 'granted'){
+              const n = new Notification(t, { body: new Date(e.hora).toLocaleTimeString(), icon: e.foto || undefined });
+              n.onclick = () => { window.focus(); location.href = url; n.close(); };
+            }
+          } catch (_) {}
         });
       }
       try { localStorage.setItem(KEY, String(ultimo)); } catch (_) {}
