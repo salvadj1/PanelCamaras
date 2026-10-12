@@ -53,6 +53,30 @@ namespace CentroSeguridad.Services
         {
             _almacen = almacen; _log = log;
             _almacen.Cambio += () => { try { _cambio.Release(); } catch (Exception) { } };
+            // Si la aplicación se cierra de golpe (ventana de consola, fin de proceso) no deja go2rtc abierto.
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => Detener();
+        }
+
+        /// <summary>
+        /// Cierra los go2rtc.exe que sigan abiertos desde un arranque anterior y salgan de NUESTRA carpeta
+        /// (un huérfano ocuparía el puerto 1984 y serviría una configuración antigua: "mse: stream not found").
+        /// No toca go2rtc de otras rutas. Los fallos de permisos se ignoran.
+        /// </summary>
+        private void CerrarHuerfanos()
+        {
+            string exe = Path.GetFullPath(Exe);
+            foreach (var p in Process.GetProcessesByName("go2rtc"))
+            {
+                try
+                {
+                    if (!string.Equals(p.MainModule.FileName, exe, StringComparison.OrdinalIgnoreCase)) continue;
+                    p.Kill();
+                    p.WaitForExit(3000);
+                    _log.LogInformation("go2rtc huérfano cerrado (PID {Pid})", p.Id);
+                }
+                catch (Exception e) { _log.LogDebug("No se pudo revisar/cerrar un go2rtc: {Msg}", e.Message); }
+                finally { p.Dispose(); }
+            }
         }
 
         /// <summary>¿Es <paramref name="src"/> un nombre de stream válido de una cámara existente?</summary>
@@ -71,6 +95,7 @@ namespace CentroSeguridad.Services
                 if (!await AsegurarBinario(stop)) return;
                 while (!stop.IsCancellationRequested)
                 {
+                    CerrarHuerfanos();
                     EscribirConfig();
                     Iniciar();
                     using (var cts = CancellationTokenSource.CreateLinkedTokenSource(stop))
