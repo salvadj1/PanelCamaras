@@ -35,7 +35,7 @@ if errorlevel 1 (
 
 rem Regla de firewall para acceder desde otros equipos (TCP 7000 y 7001, entrada)
 rem (se elimina tambien la regla con el nombre antiguo, si existiera)
-netsh advfirewall firewall delete rule name="Centro de Seguridad (5000)" >nul 2>&1
+netsh advfirewall firewall delete rule name="Panel Camaras (5000)" >nul 2>&1
 netsh advfirewall firewall delete rule name="PanelCamaras (5000)" >nul 2>&1
 netsh advfirewall firewall delete rule name="PanelCamaras (5001)" >nul 2>&1
 netsh advfirewall firewall delete rule name="PanelCamaras (7000)" >nul 2>&1

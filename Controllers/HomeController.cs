@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CentroSeguridad.Controllers
 {
     /// <summary>
-    /// Controlador de la página principal del Centro de Seguridad.
+    /// Controlador de la página principal de Panel Camaras.
     /// Solo devuelve la vista; toda la lógica vive en el JavaScript cliente.
     /// </summary>
     public class HomeController : Controller
