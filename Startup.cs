@@ -33,6 +33,7 @@ namespace CentroSeguridad
             services.AddSingleton<AlmacenCamaras>();
             services.AddSingleton<PtzService>();
             services.AddSingleton<ControlCamaras>();
+            services.AddSingleton<ServicioSd>();
             services.AddSingleton<CentroSeguridad.Services.Alarmas.AlmacenReglas>();
             services.AddSingleton<CentroSeguridad.Services.Alarmas.MotorReglas>();
             services.AddSingleton<CentroSeguridad.Services.Alarmas.ServicioAlarmas>();

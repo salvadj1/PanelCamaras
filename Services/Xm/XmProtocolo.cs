@@ -7,7 +7,7 @@ namespace CentroSeguridad.Services.Xm
     {
         public const int Login = 1000, Logout = 1002, KeepAlive = 1006, SysInfo = 1020;
         public const int ConfigSet = 1040, ConfigGet = 1042, Ability = 1360, Ptz = 1400;
-        public const int FileQuery = 1440, Machine = 1450, TimeQuery = 1452;
+        public const int PbCtrl = 1420, PbClaim = 1424, PbData = 1426, FileQuery = 1440, Machine = 1450, TimeQuery = 1452;
         public const int AlarmSub = 1500, AlarmPush = 1504, Discover = 1530, Snap = 1560, TimeSet = 1590;
     }
 

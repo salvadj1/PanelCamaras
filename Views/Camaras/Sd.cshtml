@@ -1,0 +1,25 @@
+@{
+    Layout = "_Camaras";
+    ViewData["Titulo"] = "Grabaciones · " + ViewData["CamNombre"];
+    ViewData["Tab"] = "grabaciones";
+    ViewData["Volver"] = "/camara/" + ViewData["CamId"];
+}
+<div class="row" id="dias" style="overflow-x:auto;flex-wrap:nowrap;padding:6px 0"></div>
+<p class="mut small" id="msg">Cargando…</p>
+<div id="gen" class="small" hidden><span id="genTxt"></span> <button class="btn txt" id="genReint" type="button" hidden>Reintentar</button><progress id="genBar" style="width:100%"></progress></div>
+<div id="clips" class="sdgrid"></div>
+
+<dialog id="dlgClip" class="clipdlg">
+  <div class="clipbox">
+    <div class="row" style="justify-content:space-between"><b id="cTitulo"></b><button class="btn txt" id="cCerrar" type="button">Cerrar</button></div>
+    <div class="clipview"><canvas id="cv"></canvas><div class="clipmsg" id="cMsg"></div></div>
+    <input type="range" id="cPos" min="0" max="1000" value="0" style="width:100%">
+    <div class="row" style="justify-content:space-between"><span class="small mut" id="cTiempo">0:00 / 0:00</span>
+      <span class="row"><button class="btn tonal" id="cPlay" type="button">Pausa</button><button class="btn tonal" id="cMute" type="button">Audio</button>
+      <button class="btn tonal" id="cFoto" type="button">Foto</button><button class="btn tonal" id="cDesc" type="button">Original</button></span></div>
+  </div>
+</dialog>
+@section Scripts {
+  <script src="~/js/xmcam-clip.js"></script>
+  <script src="~/js/xmcam-sd.js"></script>
+}

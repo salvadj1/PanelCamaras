@@ -230,6 +230,70 @@ namespace CentroSeguridad.Services.Xm
             using (var r = Request(Msg.ConfigSet, body)) CheckRet(r.RootElement);
         }
 
+        // ------------------------------------------------------------ grabaciones de la SD
+
+        /// <summary>
+        /// Busca grabaciones en la SD entre dos fechas ("yyyy-MM-dd HH:mm:ss") y devuelve el array JSON
+        /// <c>OPFileQuery</c> tal como lo manda la cámara (FileName, BeginTime, EndTime...) o "[]" si no hay.
+        /// </summary>
+        public string QueryFilesRaw(string begin, string end, int channel = 0, string type = "h264")
+        {
+            var cuerpo = new Dictionary<string, object>
+            {
+                ["Name"] = "OPFileQuery", ["SessionID"] = SessionStr,
+                ["OPFileQuery"] = new Dictionary<string, object>
+                {
+                    ["BeginTime"] = begin, ["EndTime"] = end, ["Channel"] = channel,
+                    ["DriverTypeMask"] = "0x0000FFFF", ["Event"] = "*", ["StreamType"] = "0x00000000", ["Type"] = type
+                }
+            };
+            using (var r = Request(Msg.FileQuery, cuerpo))
+            {
+                CheckRet(r.RootElement);
+                return r.RootElement.TryGetProperty("OPFileQuery", out var a) && a.ValueKind == JsonValueKind.Array ? a.GetRawText() : "[]";
+            }
+        }
+
+        /// <summary>Cuerpo del mensaje OPPlayBack. <paramref name="accion"/>: Claim, DownloadStart o DownloadStop.</summary>
+        private Dictionary<string, object> CuerpoPlayback(string accion, string fichero, string begin, string end) => new Dictionary<string, object>
+        {
+            ["Name"] = "OPPlayBack", ["SessionID"] = SessionStr,
+            ["OPPlayBack"] = new Dictionary<string, object>
+            {
+                ["Action"] = accion, ["StartTime"] = begin, ["EndTime"] = end,
+                ["Parameter"] = new Dictionary<string, object>
+                {
+                    ["PlayMode"] = "ByName", ["FileName"] = fichero, ["StreamType"] = 0, ["Value"] = 0, ["TransMode"] = "TCP"
+                }
+            }
+        };
+
+        /// <summary>
+        /// Descarga un clip de la SD (formato propietario XM, sin convertir) entregando los bytes a <paramref name="alRecibir"/>
+        /// hasta el fin del clip, <paramref name="maxBytes"/> o hasta que el callback devuelva false.
+        /// Secuencia: Claim (1424) → DownloadStart (1420) → datos por 1426 → paquete vacío = fin → DownloadStop.
+        /// La cámara solo atiende UNA descarga a la vez. Devuelve los bytes entregados.
+        /// </summary>
+        public long DescargarClip(string fichero, string begin, string end, Func<byte[], bool> alRecibir, long maxBytes = long.MaxValue)
+        {
+            Send(Msg.PbClaim, CuerpoPlayback("Claim", fichero, begin, end));
+            try { for (int i = 0; i < 3; i++) if (ReadPacket().MsgId == Msg.PbClaim + 1) break; } catch (IOException) { }
+            Send(Msg.PbCtrl, CuerpoPlayback("DownloadStart", fichero, begin, end));
+            SetReadTimeout(8000);
+            long total = 0;
+            while (total < maxBytes)
+            {
+                Packet p;
+                try { p = ReadPacket(); } catch (IOException) { break; }   // timeout o cierre = fin
+                if (p.Body.Length == 0) break;                               // fin del clip
+                if (p.Body[0] == (byte)'{') continue;                        // respuestas JSON de control
+                total += p.Body.Length;
+                if (!alRecibir(p.Body)) break;
+            }
+            try { Send(Msg.PbCtrl, CuerpoPlayback("DownloadStop", fichero, begin, end)); } catch (Exception) { }
+            return total;
+        }
+
         // ------------------------------------------------------------ PTZ
 
         /// <summary>

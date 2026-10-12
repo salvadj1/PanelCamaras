@@ -105,3 +105,13 @@ dialog .row{justify-content:flex-end;margin-top:16px}
 .cfg-f input[type=text],.cfg-f input[type=password],.cfg-f select{width:100%;margin-top:6px}
 .cfg-f input[type=range]{width:100%}
 .chg{border-left:3px solid var(--primary);padding-left:8px}
+.sdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:8px 0}
+.sdc{background:var(--surface-variant);border-radius:12px;overflow:hidden;cursor:pointer}
+.sdc .th{aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px}
+.sdc .th img{width:100%;height:100%;object-fit:cover}
+.sdc .in{padding:6px 8px;font-size:12px}
+.clipdlg{width:min(96vw,900px);max-width:96vw}
+.clipview{position:relative;background:#000;border-radius:8px;overflow:hidden}
+.clipview canvas{width:100%;display:block;max-height:60vh;object-fit:contain}
+.clipmsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ddd;text-align:center;padding:12px}
+.clipmsg:empty{display:none}
