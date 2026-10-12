@@ -1,0 +1,8 @@
+RENOMBRADO A PanelCamaras Y PARADA SIN INICIO AUTOMATICO
+
+IniciarServicio.bat
+  - Servicio, ejecutable, nombre visible, descripcion y regla de firewall pasan de "CentroSeguridad / Centro de Seguridad" a "PanelCamaras" (exe: PanelCamaras.exe, regla: "PanelCamaras (5000)").
+  - Elimina tambien la regla de firewall antigua "Centro de Seguridad (5000)" si existe.
+PararServicio.bat
+  - Servicio renombrado a "PanelCamaras".
+  - Antes de detener el servicio, quita el inicio automatico (sc config start= demand).

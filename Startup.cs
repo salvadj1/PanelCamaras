@@ -37,7 +37,8 @@ namespace CentroSeguridad
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            // UseHttpsRedirection eliminado: la app solo sirve HTTP (puerto 5000)
+            // y la redirección a un puerto HTTPS inexistente rompía el acceso en red.
             app.UseStaticFiles(); // sirve wwwroot (css, js)
             app.UseRouting();
 

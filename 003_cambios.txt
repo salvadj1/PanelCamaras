@@ -1,0 +1,9 @@
+ACCESO A LA WEB DESDE OTROS EQUIPOS DE LA RED LOCAL
+
+Program.cs
+  - Anadido UseUrls("http://0.0.0.0:5000") para escuchar en todas las interfaces y no solo en localhost.
+Startup.cs
+  - Eliminado UseHttpsRedirection(): redirigia a un puerto HTTPS inexistente y rompia el acceso en red.
+IniciarServicio.bat
+  - Crea (o recrea) la regla de firewall de entrada TCP 5000 "Centro de Seguridad (5000)".
+  - El mensaje final indica como acceder desde otros equipos (http://IP-DE-ESTE-PC:5000).

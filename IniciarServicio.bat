@@ -1,13 +1,13 @@
 @echo off
 rem ============================================================
 rem  IniciarServicio.bat
-rem  Registra (si no existe) el servicio "CentroSeguridad", lo deja
+rem  Registra (si no existe) el servicio "PanelCamaras", lo deja
 rem  en inicio AUTOMATICO con Windows y lo inicia ahora.
-rem  Debe estar junto a CentroSeguridad.exe. Requiere administrador.
+rem  Debe estar junto a PanelCamaras.exe. Requiere administrador.
 rem ============================================================
 setlocal
-set "SVC=CentroSeguridad"
-set "EXE=%~dp0CentroSeguridad.exe"
+set "SVC=PanelCamaras"
+set "EXE=%~dp0PanelCamaras.exe"
 
 net session >nul 2>&1
 if errorlevel 1 (
@@ -25,13 +25,20 @@ if not exist "%EXE%" (
 sc query "%SVC%" >nul 2>&1
 if errorlevel 1 (
     echo Creando servicio %SVC%...
-    sc create "%SVC%" binPath= "\"%EXE%\"" start= auto DisplayName= "Centro de Seguridad"
+    sc create "%SVC%" binPath= "\"%EXE%\"" start= auto DisplayName= "PanelCamaras"
     if errorlevel 1 ( echo Error al crear el servicio. & pause & exit /b 1 )
-    sc description "%SVC%" "Panel web Centro de Seguridad (ASP.NET Core)" >nul
+    sc description "%SVC%" "Panel web PanelCamaras (ASP.NET Core)" >nul
 ) else (
     echo El servicio ya existe. Asegurando inicio automatico...
     sc config "%SVC%" binPath= "\"%EXE%\"" start= auto >nul
 )
+
+rem Regla de firewall para acceder desde otros equipos (TCP 5000, entrada)
+rem (se elimina tambien la regla con el nombre antiguo, si existiera)
+netsh advfirewall firewall delete rule name="Centro de Seguridad (5000)" >nul 2>&1
+netsh advfirewall firewall delete rule name="PanelCamaras (5000)" >nul 2>&1
+netsh advfirewall firewall add rule name="PanelCamaras (5000)" dir=in action=allow protocol=TCP localport=5000 >nul
+if errorlevel 1 ( echo Aviso: no se pudo crear la regla de firewall. ) else ( echo Regla de firewall creada: puerto 5000. )
 
 rem Reinicio automatico ante fallos (1 min, 3 veces)
 sc failure "%SVC%" reset= 86400 actions= restart/60000/restart/60000/restart/60000 >nul
@@ -46,4 +53,5 @@ if errorlevel 1 (
 
 echo.
 echo Listo. Abre: http://localhost:5000
+echo Desde otros equipos: http://IP-DE-ESTE-PC:5000 (usa ipconfig para ver la IP)
 pause

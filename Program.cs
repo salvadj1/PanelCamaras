@@ -32,6 +32,9 @@ namespace CentroSeguridad
                 .UseWindowsService() // permite ejecutar como Servicio de Windows
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    // Escucha en todas las interfaces de red (no solo localhost)
+                    // para que otros equipos de la red local puedan acceder.
+                    webBuilder.UseUrls("http://0.0.0.0:5000");
                     webBuilder.UseStartup<Startup>();
                 });
     }
