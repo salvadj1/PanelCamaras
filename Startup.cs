@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using CentroSeguridad.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,6 +19,7 @@ namespace CentroSeguridad
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddSingleton<AlmacenGrabaciones>(); // lee RutaDeGrabaciones de appsettings.json
         }
 
         /// <summary>

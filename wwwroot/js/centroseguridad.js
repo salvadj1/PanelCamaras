@@ -479,7 +479,7 @@ async function calcSizes(){
   $('kSize').textContent = pend.length ? '…' : fmtSize(sum()); $('kSizeSub').textContent = `${arr.length} archivos`;
   let k = 0;
   await Promise.all(Array.from({ length: 6 }, async () => {
-    while (k < pend.length && tok === sizeTok){ const it = pend[k++]; try { it.size = (await it.handle.getFile()).size; } catch(_){ it.size = 0; } }
+    while (k < pend.length && tok === sizeTok){ const it = pend[k++]; try { it.size = it.handle.size ?? (await it.handle.getFile()).size; } catch(_){ it.size = 0; } }
   }));
   if (tok === sizeTok) $('kSize').textContent = fmtSize(sum());
 }
@@ -730,7 +730,7 @@ $('setFps').onchange = e => { S.set.fps = clamp(+e.target.value || 20, 1, 60); $
 $('setAuto').onchange = e => { S.set.auto = e.target.checked; saveSet(); };
 $('setTheme').onchange = e => { S.set.theme = e.target.value; saveSet(); applyTheme(); };
 $('setChange').onclick = () => { $('set').classList.remove('show'); chooseFolder(); };
-$('setForget').onclick = async () => { S.handle = null; await kvSet('root', null).catch(() => {}); $('fname').textContent = ''; $('set').classList.remove('show'); toast('Carpeta olvidada'); };
+$('setForget').onclick = async () => { S.handle = null; await kvSet('ruta', null).catch(() => {}); $('fname').textContent = ''; $('set').classList.remove('show'); toast('Carpeta olvidada'); };
 
 /* ---------- Carpeta: elegir, recordar y escanear ---------- */
 /** Escanea la carpeta raíz y muestra el último día con grabaciones. */
@@ -749,25 +749,46 @@ async function scanRoot(root){
   const cl = dayClips(); if (cl.length) loadClip(cl[cl.length - 1], { autoplay: false });
   toast(`${S.items.length} archivos encontrados`);
 }
-async function chooseFolder(){
-  if (!window.showDirectoryPicker){ alert('Usa Chrome o Edge (showDirectoryPicker).'); return; }
-  try {
-    const root = await showDirectoryPicker();
-    S.handle = root; await kvSet('root', root).catch(() => {});
-    await scanRoot(root);
-  } catch(e){ if (e.name !== 'AbortError') alert(e.message); }
+/* ---------- Origen remoto: rutas de grabaciones del servidor ---------- */
+/** Crea un "handle" de archivo compatible con walk() cuyo getFile() descarga el archivo del servidor. */
+function remoteFile(ruta, rel, size){
+  return { kind: 'file', name: rel.split('/').pop(), size,
+    getFile: async () => { const r = await fetch(`/api/archivo?ruta=${encodeURIComponent(ruta)}&p=${encodeURIComponent(rel)}`); if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); } };
 }
-/** Recarga la carpeta recordada (un clic si Chrome pide reconfirmar permiso). */
+/** Crea un "handle" de directorio en memoria compatible con walk() (entries() devuelve [nombre, handle]). */
+function remoteDir(name){ return { kind: 'directory', name, kids: new Map(), async *entries(){ yield* this.kids; } }; }
+/** Pide el índice de una ruta al servidor y lo convierte en un árbol de handles. */
+async function remoteRoot(ruta){
+  const r = await fetch(`/api/indice?ruta=${encodeURIComponent(ruta)}`);
+  if (!r.ok) throw new Error('La ruta no está disponible en el servidor');
+  const root = remoteDir(ruta);
+  for (const f of await r.json()){
+    const parts = f.p.split('/'); let d = root;
+    for (const seg of parts.slice(0, -1)){ if (!d.kids.has(seg)) d.kids.set(seg, remoteDir(seg)); d = d.kids.get(seg); }
+    d.kids.set(parts[parts.length - 1], remoteFile(ruta, f.p, f.s));
+  }
+  return root;
+}
+/** Abre (escanea) la ruta seleccionada en el selector y la recuerda en este navegador. */
 async function openFolder(){
-  if (S.handle){ try { if ((await S.handle.requestPermission({ mode: 'read' })) === 'granted') return scanRoot(S.handle); } catch(_){} }
-  chooseFolder();
+  const n = $('rutaSel').value;
+  if (!n){ toast('No hay rutas configuradas en el servidor'); return; }
+  kvSet('ruta', n).catch(() => {});
+  try { await scanRoot(await remoteRoot(n)); } catch(e){ toast(e.message); }
 }
+const chooseFolder = openFolder;
 $('bOpen').onclick = $('bFolder').onclick = openFolder;
+$('rutaSel').onchange = openFolder;
+/** Carga las rutas del servidor en el selector y abre la última usada (o la única disponible). */
 async function loadSaved(){
   try {
-    const h = await kvGet('root'); if (!h) return;
-    S.handle = h; $('fname').textContent = h.name; $('bOpen').textContent = `Reabrir «${h.name}»`;
-    if ((await h.queryPermission({ mode: 'read' })) === 'granted') await scanRoot(h);
+    const rutas = await (await fetch('/api/rutas')).json();
+    $('rutaSel').innerHTML = rutas.map(r => `<option value="${esc(r.nombre)}">${esc(r.nombre)}${r.disponible ? '' : ' (no disponible)'}</option>`).join('');
+    if (!rutas.length){ $('bOpen').disabled = true; $('bOpen').textContent = 'Sin rutas configuradas'; return; }
+    const g = await kvGet('ruta');
+    if (g && rutas.some(r => r.nombre === g)) $('rutaSel').value = g;
+    else if (rutas.length > 1) return;           // varias rutas y ninguna recordada: que elija el usuario
+    await openFolder();
   } catch(_){}
 }
 

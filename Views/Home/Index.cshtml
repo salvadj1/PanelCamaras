@@ -14,6 +14,7 @@
   <label class="search"><span data-ic="search" data-s="16"></span><input id="q" type="search" placeholder="Buscar hora o archivo (ej. 14:3)" aria-label="Buscar"></label>
   <select id="cam" aria-label="Cámara"><option value="">Todas las cámaras</option></select>
   <span id="stat"></span>
+  <select id="rutaSel" aria-label="Ruta de grabaciones" title="Ruta de grabaciones"></select>
   <button class="ib" id="bFolder" title="Recargar carpeta"><span data-ic="folder"></span><small id="fname"></small></button>
   <button class="ib" id="bTheme" title="Cambiar tema"></button>
   <button class="ib" id="bSet" title="Ajustes"><span data-ic="sliders"></span></button>
@@ -22,9 +23,9 @@
 <main>
   <div id="empty">
     <span data-ic="shield" data-s="56" style="color:var(--acc)"></span>
-    <h2>Elige la carpeta de grabaciones</h2>
-    <p style="color:var(--mut);margin:0 0 16px">Se escanearán todas las subcarpetas en busca de .h264 y fotos. La carpeta se recordará.</p>
-    <button class="btn" id="bOpen">Elegir carpeta</button>
+    <h2>Elige la ruta de grabaciones</h2>
+    <p style="color:var(--mut);margin:0 0 16px">Las rutas las define el servidor (appsettings.json, RutaDeGrabaciones). Se escanean todas las subcarpetas en busca de .h264 y fotos.</p>
+    <button class="btn" id="bOpen">Abrir ruta seleccionada</button>
   </div>
 
   <div id="dash" hidden>
