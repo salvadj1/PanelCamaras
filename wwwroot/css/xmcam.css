@@ -96,3 +96,12 @@ dialog .row{justify-content:flex-end;margin-top:16px}
 .setrow div:first-child{flex:1}
 
 @media (max-width:560px){.appbar h1{font-size:19px}}
+.inp{background:transparent;border:1px solid var(--outline);border-radius:6px;padding:10px;color:inherit}
+.inp:focus{border-color:var(--primary);outline:0}
+.blk{display:block;text-decoration:none;color:inherit;background:var(--surface-variant);border-radius:12px;padding:12px;margin:6px 0}
+.blk .mut{font-size:12px}
+.cfg-f{padding:10px 0;border-bottom:1px solid var(--outline)}
+.cfg-f .h{font-size:12px;color:var(--on-surface-variant)}
+.cfg-f input[type=text],.cfg-f input[type=password],.cfg-f select{width:100%;margin-top:6px}
+.cfg-f input[type=range]{width:100%}
+.chg{border-left:3px solid var(--primary);padding-left:8px}

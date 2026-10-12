@@ -28,6 +28,7 @@ namespace CentroSeguridad.Services
             public int PuertoHttp { get; set; } = 80;
             public int Canal { get; set; }
             public bool RtspHash { get; set; }
+            public bool Vigilar { get; set; } = true;
         }
 
         private readonly object _lock = new object();
@@ -60,6 +61,20 @@ namespace CentroSeguridad.Services
             Cambio?.Invoke();
         }
 
+        /// <summary>Modifica una cámara existente con <paramref name="cambio"/>, la guarda y avisa del cambio. false si no existe.</summary>
+        public bool Actualizar(string id, Action<CamaraXm> cambio)
+        {
+            lock (_lock)
+            {
+                var cam = _camaras.FirstOrDefault(c => c.Id == id);
+                if (cam == null) return false;
+                cambio(cam);
+                Guardar();
+            }
+            Cambio?.Invoke();
+            return true;
+        }
+
         /// <summary>Elimina una cámara. Devuelve false si no existía.</summary>
         public bool Eliminar(string id)
         {
@@ -83,7 +98,7 @@ namespace CentroSeguridad.Services
                 {
                     Id = g.Id, Nombre = g.Nombre, Host = g.Host, Puerto = g.Puerto, Usuario = g.Usuario,
                     Password = Descifrar(g.PasswordCifrada), PuertoRtsp = g.PuertoRtsp, PuertoHttp = g.PuertoHttp,
-                    Canal = g.Canal, RtspHash = g.RtspHash
+                    Canal = g.Canal, RtspHash = g.RtspHash, Vigilar = g.Vigilar
                 }).ToList();
             }
             catch (Exception) { return new List<CamaraXm>(); }
@@ -102,7 +117,7 @@ namespace CentroSeguridad.Services
             {
                 Id = c.Id, Nombre = c.Nombre, Host = c.Host, Puerto = c.Puerto, Usuario = c.Usuario,
                 PasswordCifrada = string.IsNullOrEmpty(c.Password) ? "" : _proteccion.Protect(c.Password),
-                PuertoRtsp = c.PuertoRtsp, PuertoHttp = c.PuertoHttp, Canal = c.Canal, RtspHash = c.RtspHash
+                PuertoRtsp = c.PuertoRtsp, PuertoHttp = c.PuertoHttp, Canal = c.Canal, RtspHash = c.RtspHash, Vigilar = c.Vigilar
             }).ToList();
             string tmp = _archivo + ".tmp";
             File.WriteAllText(tmp, JsonSerializer.Serialize(lista, new JsonSerializerOptions { WriteIndented = true }));

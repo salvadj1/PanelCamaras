@@ -32,6 +32,7 @@ namespace CentroSeguridad
                 .ProtectKeysWithDpapi(protectToLocalMachine: true);
             services.AddSingleton<AlmacenCamaras>();
             services.AddSingleton<PtzService>();
+            services.AddSingleton<ControlCamaras>();
             services.AddSingleton<EstadoCamaras>();
             services.AddHostedService(sp => sp.GetRequiredService<EstadoCamaras>());
             services.AddSingleton<Go2RtcService>();

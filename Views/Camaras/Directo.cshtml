@@ -12,12 +12,13 @@
 </div>
 <p id="estado" class="small mut" style="margin:4px 2px;min-height:18px"></p>
 
-<div class="tabs">
-  <span class="sel">Directo</span>
+<div class="tabs" id="tabs">
+  <a href="#" class="sel" data-p="directo">Directo</a>
   <a href="/grabaciones">Grabaciones</a>
-  <span class="dis" title="Próxima fase">Ajustes</span>
-  <span class="dis" title="Próxima fase">Info</span>
+  <a href="#" data-p="ajustes">Ajustes</a>
+  <a href="#" data-p="info">Info</a>
 </div>
+<div id="pDirecto">
 
 <div class="row" style="margin:4px 0">
   <button class="chip" id="cHd" type="button">HD</button>
@@ -36,8 +37,27 @@
 </div>
 <p class="small mut" style="margin:2px 2px">Posiciones: toca para ir · mantén pulsado para guardar la actual</p>
 <div class="presets" id="presets"></div>
+</div>
+<div id="pAjustes" hidden>
+  <h2 class="sec">En esta app</h2>
+  <div class="setrow"><div><div>Vigilar alarmas de esta cámara</div><div class="mut small">El servidor escucha sus eventos aunque no tengas la web abierta.</div></div><label class="switch"><input type="checkbox" id="cVigilar"><i></i></label></div>
+  <div class="setrow"><div><div>RTSP con hash XM</div><div class="mut small">Actívalo si el vídeo no abre con tu contraseña normal.</div></div><label class="switch"><input type="checkbox" id="cHash"><i></i></label></div>
+  <h2 class="sec">Ajustes de la cámara</h2>
+  <div id="bloques"></div>
+  <div class="card" style="margin:10px 0"><div class="mut small">Otro bloque (avanzado)</div>
+    <div class="row"><input class="inp" id="bloqueOtro" placeholder="p. ej. Detect.BlindDetect" style="flex:1"><button class="btn tonal" id="bloqueIr" type="button">Abrir</button></div></div>
+  <h2 class="sec">Acciones</h2>
+  <div class="row"><button class="btn tonal" id="bHora" type="button">Sincronizar hora</button><button class="btn tonal" id="bReinicio" type="button">Reiniciar cámara</button></div>
+</div>
+<div id="pInfo" hidden>
+  <div class="card" style="margin:10px 0"><div class="row" style="justify-content:space-between"><b id="iNombre"></b><button class="btn tonal" id="bNombre" type="button">Cambiar nombre</button></div></div>
+  <h2 class="sec">Conexión</h2><div class="card small" id="iConex"></div>
+  <h2 class="sec">Sistema</h2><div class="card small" id="iSis">Cargando…</div>
+</div>
 @section Scripts {
   <script src="~/js/xmcam-live.js"></script>
   <script src="~/js/xmcam-joystick.js"></script>
+  <script src="~/js/xmcam-schemas.js"></script>
   <script src="~/js/xmcam-directo.js"></script>
+  <script src="~/js/xmcam-camajustes.js"></script>
 }

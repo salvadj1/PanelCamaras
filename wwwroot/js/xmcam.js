@@ -41,6 +41,18 @@ const XM = (() => {
     });
   }
 
+  /** Diálogo con un campo de texto. Devuelve el texto escrito o null si se cancela. */
+  function pedirTexto(titulo, valor = '', okTxt = 'Guardar'){
+    return new Promise(res => {
+      const d = document.createElement('dialog');
+      d.innerHTML = `<h3>${esc(titulo)}</h3><input class="inp" style="width:100%" value="${esc(valor)}"><div class="row"><button class="btn txt" data-r="0">Cancelar</button><button class="btn txt" data-r="1">${esc(okTxt)}</button></div>`;
+      const fin = v => { d.close(); d.remove(); res(v); };
+      d.onclick = e => { const r = e.target.dataset && e.target.dataset.r; if (r === '0') fin(null); else if (r === '1') fin(d.querySelector('input').value); };
+      d.oncancel = () => { d.remove(); res(null); };
+      document.body.appendChild(d); d.showModal(); d.querySelector('input').focus();
+    });
+  }
+
   /** Temas disponibles (equivalentes a AppThemeId de la app Android). */
   const THEMES = [
     { id: 'NVR_DARK', label: 'NVR oscuro', desc: 'Negro azulado con acento azul. Aspecto de grabador profesional.', dark: true, c: '#3b82f6' },
@@ -66,5 +78,5 @@ const XM = (() => {
     return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.floor(m / 60)} h` : `hace ${Math.floor(m / 1440)} d`;
   }
 
-  return { $, esc, store, api, toast, confirmar, THEMES, applyTheme, resolveTheme, relativo };
+  return { $, esc, store, api, toast, confirmar, pedirTexto, THEMES, applyTheme, resolveTheme, relativo };
 })();

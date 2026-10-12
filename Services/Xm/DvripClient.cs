@@ -177,6 +177,59 @@ namespace CentroSeguridad.Services.Xm
             }
         }
 
+        // ------------------------------------------------------------ información y configuración
+
+        /// <summary>Información del sistema (serie, versión, canales...) como pares clave -> valor en texto.</summary>
+        public Dictionary<string, string> SystemInfo()
+        {
+            var res = new Dictionary<string, string>();
+            using (var r = Request(Msg.SysInfo, Base("SystemInfo")))
+            {
+                if (r.RootElement.TryGetProperty("SystemInfo", out var si) && si.ValueKind == JsonValueKind.Object)
+                    foreach (var p in si.EnumerateObject())
+                        res[p.Name] = p.Value.ValueKind == JsonValueKind.String ? p.Value.GetString() : p.Value.GetRawText();
+            }
+            return res;
+        }
+
+        /// <summary>Hora de la cámara ("yyyy-MM-dd HH:mm:ss") o cadena vacía.</summary>
+        public string GetTime()
+        {
+            using (var r = Request(Msg.TimeQuery, Base("OPTimeQuery"))) return GetString(r.RootElement, "OPTimeQuery");
+        }
+
+        /// <summary>Fija la hora de la cámara. Formato "yyyy-MM-dd HH:mm:ss".</summary>
+        public void SetTime(string time)
+        {
+            var m = Base("OPTimeSetting"); m["OPTimeSetting"] = time;
+            using (var r = Request(Msg.TimeSet, m)) CheckRet(r.RootElement);
+        }
+
+        /// <summary>Reinicia la cámara (la conexión se cortará). No espera respuesta.</summary>
+        public void Reboot()
+        {
+            var m = Base("OPMachine"); m["OPMachine"] = new Dictionary<string, object> { ["Action"] = "Reboot" };
+            Send(Msg.Machine, m);
+        }
+
+        /// <summary>Lee un bloque de configuración (p. ej. "Detect.MotionDetect") como JSON en bruto (objeto o array).</summary>
+        public string GetConfigRaw(string nombre)
+        {
+            using (var r = Request(Msg.ConfigGet, Base(nombre)))
+            {
+                CheckRet(r.RootElement);
+                return r.RootElement.TryGetProperty(nombre, out var v) ? v.GetRawText() : null;
+            }
+        }
+
+        /// <summary>Escribe un bloque de configuración completo a partir de su JSON en bruto.</summary>
+        public void SetConfigRaw(string nombre, string rawJson)
+        {
+            string n = JsonSerializer.Serialize(nombre);
+            string body = "{\"Name\":" + n + ",\"SessionID\":\"" + SessionStr + "\"," + n + ":" + rawJson + "}";
+            using (var r = Request(Msg.ConfigSet, body)) CheckRet(r.RootElement);
+        }
+
         // ------------------------------------------------------------ PTZ
 
         /// <summary>

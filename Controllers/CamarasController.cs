@@ -29,6 +29,17 @@ namespace CentroSeguridad.Controllers
             return View();
         }
 
+        /// <summary>GET /camara/{id}/config: editor de un bloque de configuración de la cámara (?name=...&amp;filter=...).</summary>
+        [HttpGet("camara/{id}/config")]
+        public IActionResult Config(string id)
+        {
+            var cam = _almacen.Obtener(id);
+            if (cam == null) return NotFound();
+            ViewData["CamId"] = cam.Id;
+            ViewData["CamNombre"] = cam.Nombre;
+            return View();
+        }
+
         /// <summary>GET /ajustes: tema y preferencias de la web.</summary>
         [HttpGet("ajustes")]
         public IActionResult Ajustes() => View();

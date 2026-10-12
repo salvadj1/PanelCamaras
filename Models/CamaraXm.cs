@@ -18,6 +18,8 @@ namespace CentroSeguridad.Models
         public int Canal { get; set; } = 0;
         /// <summary>Algunos firmwares exigen el hash XM en la URL RTSP en lugar de la contraseña.</summary>
         public bool RtspHash { get; set; }
+        /// <summary>Si true, el servidor vigila las alarmas de esta cámara (Fase 3).</summary>
+        public bool Vigilar { get; set; } = true;
 
         /// <summary>URL RTSP. stream: 0 = principal (HD), 1 = secundario (SD).</summary>
         public string RtspUrl(int stream)
