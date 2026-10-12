@@ -39,8 +39,16 @@ namespace CentroSeguridad
                 app.UseHsts();
             }
 
-            // UseHttpsRedirection eliminado: la app solo sirve HTTP (puerto 5000)
-            // y la redirección a un puerto HTTPS inexistente rompía el acceso en red.
+            // Equipos remotos por HTTP (5000) -> HTTPS (5001): WebCodecs solo funciona en contexto seguro.
+            // En localhost se deja HTTP, que ya es contexto seguro.
+            app.Use(async (ctx, next) =>
+            {
+                var host = ctx.Request.Host.Host;
+                if (!ctx.Request.IsHttps && host != "localhost" && host != "127.0.0.1" && host != "[::1]")
+                    ctx.Response.Redirect($"https://{host}:5001{ctx.Request.Path}{ctx.Request.QueryString}");
+                else
+                    await next();
+            });
             app.UseStaticFiles(); // sirve wwwroot (css, js)
             app.UseRouting();
 
