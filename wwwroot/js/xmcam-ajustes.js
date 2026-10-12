@@ -59,6 +59,11 @@
   async function cargar(){
     try {
       const s = await api('/api/sistema');
+      const pto = ':7001', nombre = 'https://' + s.equipo + pto;
+      $('dirNombre').textContent = nombre; $('bAbrir').href = nombre;
+      $('bCopiar').onclick = () => { (navigator.clipboard ? navigator.clipboard.writeText(nombre) : Promise.reject()).then(() => toast('Dirección copiada')).catch(() => toast(nombre)); };
+      $('kvRed').innerHTML = fila('Esta página', esc(location.origin)) + fila('Conexión', location.protocol === 'https:' ? 'HTTPS (cifrada)' : 'HTTP (sin cifrar)')
+        + fila('Por IP', s.ips.length ? s.ips.map(i => `https://${esc(i)}${pto}`).join('<br>') : 'Sin red');
       $('kvAlm').innerHTML = fila('Eventos guardados', s.eventos) + fila('Fotos de alarma', mb(s.fotosBytes)) + fila('Miniaturas de la SD', mb(s.miniaturasBytes))
         + fila('Rutas de grabaciones', s.rutas.length ? s.rutas.map(r => esc(r.nombre) + (r.disponible ? '' : ' (no disponible)')).join('<br>') : 'Ninguna');
       $('kvSis').innerHTML = fila('Versión', esc(s.version || '—')) + fila('Sistema', esc(s.so)) + fila('Runtime', esc(s.runtime))
@@ -74,7 +79,6 @@
   $('bGo2rtc').onclick = async () => {
     try { await api('/api/sistema/reiniciar-go2rtc', 'POST'); toast('Reiniciando el conversor de vídeo…'); setTimeout(cargar, 2500); } catch (x) { toast(x.message); }
   };
-  $('kvRed').innerHTML = fila('Dirección de esta página', esc(location.origin)) + fila('Conexión', location.protocol === 'https:' ? 'HTTPS (cifrada)' : 'HTTP (sin cifrar)');
   cargar();
 })();
 

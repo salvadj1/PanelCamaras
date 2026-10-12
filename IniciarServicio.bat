@@ -44,9 +44,9 @@ netsh advfirewall firewall add rule name="PanelCamaras (7000)" dir=in action=all
 netsh advfirewall firewall add rule name="PanelCamaras (7001)" dir=in action=allow protocol=TCP localport=7001 >nul
 if errorlevel 1 ( echo Aviso: no se pudo crear la regla de firewall. ) else ( echo Reglas de firewall creadas: puertos 7000 y 7001. )
 
-rem Anuncio en la red (mDNS panelcamaras.local y SSDP): UDP 5353 y 1900, entrada
+rem Anuncio en la red (SSDP, pestana Red de Windows): UDP 1900, entrada
 netsh advfirewall firewall delete rule name="PanelCamaras (anuncio)" >nul 2>&1
-netsh advfirewall firewall add rule name="PanelCamaras (anuncio)" dir=in action=allow protocol=UDP localport=5353,1900 >nul
+netsh advfirewall firewall add rule name="PanelCamaras (anuncio)" dir=in action=allow protocol=UDP localport=1900 >nul
 
 rem Reinicio automatico ante fallos (1 min, 3 veces)
 sc failure "%SVC%" reset= 86400 actions= restart/60000/restart/60000/restart/60000 >nul
@@ -61,5 +61,5 @@ if errorlevel 1 (
 
 echo.
 echo Listo. Abre: http://localhost:7000
-echo Desde otros equipos: https://panelcamaras.local:7001 o https://IP-DE-ESTE-PC:7001 (aceptar el aviso del certificado la primera vez) (usa ipconfig para ver la IP)
+echo Desde otros equipos: https://NOMBRE-DE-ESTE-PC:7001 o https://IP-DE-ESTE-PC:7001 (aceptar el aviso del certificado la primera vez) (usa ipconfig para ver la IP)
 pause

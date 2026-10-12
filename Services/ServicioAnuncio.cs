@@ -14,22 +14,17 @@ using Microsoft.Extensions.Logging;
 namespace CentroSeguridad.Services
 {
     /// <summary>
-    /// Anuncia el panel en la red local para encontrarlo sin saber su IP:
-    ///  - mDNS (UDP 5353): responde al nombre <c>panelcamaras.local</c> con las IPv4 del equipo.
-    ///  - SSDP/UPnP (UDP 1900): aparece en la pestaña "Red" del Explorador de Windows (descripción en /upnp.xml).
-    /// Es autónomo y reutilizable: solo necesita el nombre, el puerto y el nombre visible. Si un puerto UDP está ocupado
-    /// o bloqueado, ese anuncio se omite sin afectar al resto de la aplicación.
+    /// Anuncia el panel en la red local por SSDP/UPnP (UDP 1900): aparece en la pestaña "Red" del Explorador de Windows
+    /// (descripción en /upnp.xml). Si el puerto UDP está ocupado o bloqueado, el anuncio se omite sin afectar al resto
+    /// de la aplicación. Para entrar desde otros equipos se usa el nombre del PC o su IP (ver Ajustes → Red).
     /// </summary>
     public class ServicioAnuncio : BackgroundService
     {
-        /// <summary>Nombre de host anunciado (sin ".local").</summary>
-        public const string Nombre = "panelcamaras";
         /// <summary>Puerto HTTPS de la aplicación (el que debe abrir quien encuentre el panel).</summary>
         public const int PuertoHttps = 7001;
         /// <summary>Identificador único estable del dispositivo (mismo valor tras cada reinicio de este equipo).</summary>
         public static readonly Guid Uuid = CrearUuid();
 
-        private static readonly IPAddress GrupoMdns = IPAddress.Parse("224.0.0.251");
         private static readonly IPAddress GrupoSsdp = IPAddress.Parse("239.255.255.250");
         private readonly ILogger<ServicioAnuncio> _log;
 
@@ -72,7 +67,7 @@ namespace CentroSeguridad.Services
         }
 
         protected override Task ExecuteAsync(CancellationToken stop) =>
-            Task.WhenAll(Task.Run(() => Mdns(stop), stop), Task.Run(() => Ssdp(stop), stop));
+            Task.Run(() => Ssdp(stop), stop);
 
         /// <summary>Abre un socket UDP compartido en <paramref name="puerto"/> y lo une al grupo multicast en todas las interfaces.</summary>
         private static UdpClient Abrir(int puerto, IPAddress grupo)
@@ -82,69 +77,6 @@ namespace CentroSeguridad.Services
             u.Client.Bind(new IPEndPoint(IPAddress.Any, puerto));
             foreach (var ip in IpsLocales()) { try { u.JoinMulticastGroup(grupo, ip); } catch (Exception) { } }
             return u;
-        }
-
-        // ------------------------------------------------------------------ mDNS
-        private async Task Mdns(CancellationToken stop)
-        {
-            try
-            {
-                using (var u = Abrir(5353, GrupoMdns))
-                {
-                    stop.Register(() => { try { u.Close(); } catch (Exception) { } });
-                    var destino = new IPEndPoint(GrupoMdns, 5353);
-                    Enviar(u, destino);   // anuncio inicial
-                    while (!stop.IsCancellationRequested)
-                    {
-                        var rx = await u.ReceiveAsync();
-                        if (PreguntaPorNosotros(rx.Buffer)) Enviar(u, destino);
-                    }
-                }
-            }
-            catch (Exception e) when (!stop.IsCancellationRequested) { _log.LogInformation("mDNS no disponible: {Msg}", e.Message); }
-            catch (Exception) { }
-        }
-
-        /// <summary>¿Contiene el paquete una pregunta (tipo A o ANY) por "panelcamaras.local"?</summary>
-        public static bool PreguntaPorNosotros(byte[] p)
-        {
-            try
-            {
-                if (p.Length < 12 || (p[2] & 0x80) != 0) return false;            // solo consultas
-                int preguntas = (p[4] << 8) | p[5], i = 12;
-                for (int q = 0; q < preguntas; q++)
-                {
-                    var etiquetas = new List<string>();
-                    while (p[i] != 0) { int n = p[i]; if ((n & 0xC0) != 0) return false; etiquetas.Add(Encoding.ASCII.GetString(p, i + 1, n)); i += n + 1; }
-                    i++;
-                    int tipo = (p[i] << 8) | p[i + 1]; i += 4;
-                    if (etiquetas.Count == 2 && etiquetas[0].Equals(Nombre, StringComparison.OrdinalIgnoreCase) && etiquetas[1].Equals("local", StringComparison.OrdinalIgnoreCase)
-                        && (tipo == 1 || tipo == 255)) return true;
-                }
-            }
-            catch (Exception) { }
-            return false;
-        }
-
-        /// <summary>Respuesta mDNS con un registro A por cada IPv4 local.</summary>
-        public static byte[] RespuestaMdns(List<IPAddress> ips)
-        {
-            var m = new List<byte> { 0, 0, 0x84, 0, 0, 0, (byte)(ips.Count >> 8), (byte)ips.Count, 0, 0, 0, 0 };
-            foreach (var ip in ips)
-            {
-                m.Add((byte)Nombre.Length); m.AddRange(Encoding.ASCII.GetBytes(Nombre));
-                m.Add(5); m.AddRange(Encoding.ASCII.GetBytes("local")); m.Add(0);
-                m.AddRange(new byte[] { 0, 1, 0x80, 1, 0, 0, 0, 120, 0, 4 });   // tipo A, clase IN con "cache flush", TTL 120 s, 4 bytes
-                m.AddRange(ip.GetAddressBytes());
-            }
-            return m.ToArray();
-        }
-
-        private void Enviar(UdpClient u, IPEndPoint destino)
-        {
-            var ips = IpsLocales(); if (ips.Count == 0) return;
-            var r = RespuestaMdns(ips);
-            try { u.Send(r, r.Length, destino); } catch (Exception) { }
         }
 
         // ------------------------------------------------------------------ SSDP / UPnP

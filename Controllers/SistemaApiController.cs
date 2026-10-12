@@ -53,6 +53,8 @@ namespace CentroSeguridad.Controllers
             return Ok(new
             {
                 version = typeof(SistemaApiController).Assembly.GetName().Version?.ToString(),
+                equipo = Environment.MachineName,
+                ips = ServicioAnuncio.IpsLocales().Select(i => i.ToString()),
                 so = RuntimeInformation.OSDescription,
                 runtime = RuntimeInformation.FrameworkDescription,
                 inicio = new DateTimeOffset(inicio).ToUnixTimeMilliseconds(),
