@@ -1,0 +1,12 @@
+SOPORTE DE SERVICIO DE WINDOWS Y SCRIPTS DE CONTROL
+
+CentroSeguridad.csproj
+  - Anadido paquete Microsoft.Extensions.Hosting.WindowsServices 5.0.1.
+  - wwwroot se copia a la carpeta de salida (bin) para que el servicio encuentre css/js.
+  - IniciarServicio.bat y PararServicio.bat se copian junto al .exe al compilar y al publicar.
+Program.cs
+  - Anadido .UseWindowsService() en CreateHostBuilder (y documentacion).
+IniciarServicio.bat (nuevo)
+  - Crea el servicio CentroSeguridad si no existe, inicio automatico con Windows, reinicio ante fallos e inicia el servicio.
+PararServicio.bat (nuevo)
+  - Detiene el servicio CentroSeguridad (sin eliminarlo).

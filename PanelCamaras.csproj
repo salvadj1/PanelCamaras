@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Soporte para ejecutar la app como Servicio de Windows -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copia wwwroot junto al .exe al compilar (el servicio arranca desde bin, no desde el proyecto) -->
+    <Content Update="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+
+    <!-- Los .bat se generan al lado del .exe al compilar y al publicar -->
+    <None Include="IniciarServicio.bat" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="PararServicio.bat" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

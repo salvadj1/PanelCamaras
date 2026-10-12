@@ -1,0 +1,20 @@
+MIGRACION INICIAL DE CentroSeguridad.html A ASP.NET Core MVC (net5.0, VS2019)
+
+CentroSeguridad.csproj
+  - Proyecto nuevo, target net5.0, SDK Web.
+Program.cs
+  - Punto de entrada y host por defecto (comentado, reutilizable).
+Startup.cs
+  - AddControllersWithViews, archivos estaticos y ruta por defecto Home/Index.
+Controllers/HomeController.cs
+  - Accion Index que devuelve la vista.
+Views/Home/Index.cshtml
+  - HTML original sin cambios; el <style> y el <script> pasan a archivos externos y se enlazan con ~/.
+Views/_ViewStart.cshtml, Views/_ViewImports.cshtml
+  - Configuracion Razor (Layout nulo, tag helpers).
+wwwroot/css/centroseguridad.css
+  - CSS original extraido byte a byte (verificado identico al reensamblar).
+wwwroot/js/centroseguridad.js
+  - JS original extraido byte a byte (verificado identico al reensamblar).
+Properties/launchSettings.json
+  - Perfiles IIS Express (HTTPS 44300) y Kestrel (https://localhost:5001).

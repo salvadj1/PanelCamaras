@@ -1,0 +1,131 @@
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Centro de Seguridad</title>
+<link rel="stylesheet" href="~/css/centroseguridad.css">
+</head>
+<body>
+<header>
+  <div class="logo"><span data-ic="shield" data-s="18" style="color:var(--acc)"></span><span>Centro de Seguridad</span></div>
+  <div class="sp"></div>
+  <label class="search"><span data-ic="search" data-s="16"></span><input id="q" type="search" placeholder="Buscar hora o archivo (ej. 14:3)" aria-label="Buscar"></label>
+  <select id="cam" aria-label="Cámara"><option value="">Todas las cámaras</option></select>
+  <span id="stat"></span>
+  <button class="ib" id="bFolder" title="Recargar carpeta"><span data-ic="folder"></span><small id="fname"></small></button>
+  <button class="ib" id="bTheme" title="Cambiar tema"></button>
+  <button class="ib" id="bSet" title="Ajustes"><span data-ic="sliders"></span></button>
+</header>
+
+<main>
+  <div id="empty">
+    <span data-ic="shield" data-s="56" style="color:var(--acc)"></span>
+    <h2>Elige la carpeta de grabaciones</h2>
+    <p style="color:var(--mut);margin:0 0 16px">Se escanearán todas las subcarpetas en busca de .h264 y fotos. La carpeta se recordará.</p>
+    <button class="btn" id="bOpen">Elegir carpeta</button>
+  </div>
+
+  <div id="dash" hidden>
+    <div class="lay">
+    <div class="colL">
+    <div class="card cal">
+      <div class="calh">
+        <button class="ib" id="dPrev" aria-label="Mes anterior"><span data-ic="chev-l" data-s="16"></span></button>
+        <b id="calT"></b>
+        <button class="ib" id="dNext" aria-label="Mes siguiente"><span data-ic="chev-r" data-s="16"></span></button>
+      </div>
+      <div class="calw"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+      <div class="calg" id="dstrip"></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Grabaciones del día</div><div class="v" id="kClips">0</div><div class="s" id="kClipsSub"></div><div class="spark" id="kSpark"></div></div>
+      <div class="kpi"><div class="l">Tiempo grabado</div><div class="v" id="kTime">0 min</div><div class="s" id="kTimeSub"></div></div>
+      <div class="kpi"><div class="l">Fotos</div><div class="v" id="kPics">0</div><div class="s" id="kPicsSub"></div></div>
+      <div class="kpi"><div class="l">Espacio usado</div><div class="v" id="kSize">…</div><div class="s" id="kSizeSub"></div></div>
+    </div>
+    </div>
+
+      <section class="card" id="pl">
+        <div class="vbox" id="vbox">
+          <canvas id="cv" width="1280" height="720"></canvas>
+          <div class="ov tl" id="ovInfo"></div>
+          <div class="ov tr" id="ovRec"></div>
+          <div class="ov bl">Espacio pausa · J/L ±10 s · , . fotograma · ←/→ clip · F pantalla completa · M silencio</div>
+          <div id="vmsg">Selecciona una grabación</div>
+          <button id="bigPlay" aria-label="Reproducir"><span data-ic="play" data-s="30"></span></button>
+        </div>
+        <div class="scrub" id="scrub" role="slider" aria-label="Posición" tabindex="0">
+          <div id="sfill"></div><div id="sknob"></div>
+          <div id="sprev"><img id="sprevImg" alt=""><span id="sprevT"></span></div>
+        </div>
+        <div class="ctrl">
+          <button class="ib" id="bPrev" title="Clip anterior (←)"><span data-ic="skip-b"></span></button>
+          <button class="ib" id="bB10" title="−10 s (J)"><span data-ic="rot-l"></span><small>10</small></button>
+          <button class="ib" id="bPlay" title="Reproducir / pausa (Espacio)"></button>
+          <button class="ib" id="bF10" title="+10 s (L)"><span data-ic="rot-r"></span><small>10</small></button>
+          <button class="ib" id="bNext" title="Clip siguiente (→)"><span data-ic="skip-f"></span></button>
+          <span class="tm" id="tm">00:00 / 00:00</span>
+          <span class="sp"></span>
+          <span class="vol"><button class="ib" id="bMute" title="Silenciar (M)"></button><input type="range" id="vol" min="0" max="100" value="100" aria-label="Volumen" title="Volumen"></span>
+          <label>FPS <input id="fps" type="number" min="1" max="60" value="20"></label>
+          <select id="spd" aria-label="Velocidad"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option></select>
+          <button class="ib" id="bLoop" title="Repetir clip"><span data-ic="repeat"></span></button>
+          <button class="ib" id="bCap" title="Guardar captura"><span data-ic="camera"></span></button>
+          <button class="ib" id="bDl" title="Descargar clip"><span data-ic="download"></span></button>
+          <button class="ib" id="bFs" title="Pantalla completa (F)"><span data-ic="full"></span></button>
+        </div>
+      </section>
+
+      <aside class="card" id="side">
+        <div class="sh">
+          <b>Grabaciones</b>
+          <button class="ib on" id="tClips" title="Clips"><span data-ic="film"></span></button>
+          <button class="ib" id="tPics" title="Fotos"><span data-ic="image"></span></button>
+          <button class="ib" id="vList" title="Lista"><span data-ic="list"></span></button>
+          <button class="ib" id="vGrid" title="Cuadrícula"><span data-ic="grid"></span></button>
+        </div>
+        <div class="chips" id="chips"></div>
+        <div id="list"></div>
+        <div class="sf" id="selbar"></div>
+      </aside>
+
+      <section class="card" id="tlc">
+        <div class="tlh"><b style="color:var(--fg)">Línea de tiempo</b><span class="sp"></span>
+          <button class="ib" id="zOut" title="Alejar" aria-label="Alejar"><span data-ic="zoom-out" data-s="16"></span></button>
+          <input type="range" id="zs" min="0" max="100" value="0" aria-label="Zoom">
+          <button class="ib" id="zIn" title="Acercar" aria-label="Acercar"><span data-ic="zoom-in" data-s="16"></span></button>
+          <button class="zb on" data-z="24">24 h</button><button class="zb" data-z="6">6 h</button><button class="zb" data-z="1">1 h</button><button class="zb" data-z="0.1667">10 min</button></div>
+        <div class="mm" id="mm" title="Minimapa de 24 h: pulsa o arrastra para mover la ventana"></div>
+        <div class="tl" id="tl"></div>
+        <div class="leg"><span><i style="width:10px;height:6px;background:var(--acc)"></i>Movimiento</span><span><i style="width:10px;height:6px;background:var(--mut);opacity:.6"></i>Continua</span><span><i style="width:1px;height:8px;background:var(--warn)"></i>Foto</span><span class="sp"></span><span>Rueda = zoom · arrastrar = desplazar</span></div>
+        <div class="strip"><span>Fotos de este clip</span><span id="clipPics" style="display:flex;gap:6px;flex-wrap:wrap"></span></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div class="modal" id="lb">
+  <div id="lbT"></div><img id="lbImg" alt="">
+  <div class="lbc">
+    <button class="ib" id="lbPrev" aria-label="Anterior"><span data-ic="chev-l"></span></button>
+    <button class="ib" id="lbDl" aria-label="Descargar"><span data-ic="download"></span></button>
+    <button class="ib" id="lbNext" aria-label="Siguiente"><span data-ic="chev-r"></span></button>
+    <button class="ib" id="lbX" aria-label="Cerrar"><span data-ic="x"></span></button>
+  </div>
+</div>
+<div class="modal" id="set">
+  <div class="box">
+    <h3>Ajustes</h3>
+    <div class="fr"><span>FPS por defecto</span><input id="setFps" type="number" min="1" max="60" style="width:80px"></div>
+    <div class="fr"><span>Pasar al siguiente clip al terminar</span><input id="setAuto" type="checkbox"></div>
+    <div class="fr"><span>Tema</span><select id="setTheme"><option value="auto">Automático</option><option value="dark">Oscuro</option><option value="light">Claro</option></select></div>
+    <div class="fr"><button class="btn sec" id="setChange">Cambiar carpeta</button><button class="btn sec" id="setForget">Olvidar carpeta</button><button class="btn" id="setX">Cerrar</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="~/js/centroseguridad.js"></script>
+</body>
+</html>
