@@ -16,6 +16,31 @@
   const players = new Map();   // id -> XmLive
   const tiles = new Map();     // id -> {el, img, vid, dot, info}
 
+  /** Columnas según la distribución y el ancho de la ventana (se recalcula al girar o cambiar el tamaño). */
+  function columnas(){
+    const w = window.innerWidth;
+    switch (layout){
+      case 1: return w < 900 ? 1 : w < 1500 ? 2 : 3;
+      case 2: return w < 600 ? 3 : w < 1000 ? 4 : w < 1500 ? 5 : 6;
+      case 3: return w < 600 ? 3 : w < 900 ? 4 : w < 1300 ? 6 : 8;
+      default: return mejorAjuste();
+    }
+  }
+  /** Columnas que dan las casillas 16:9 más grandes para el número de cámaras en el espacio libre de la ventana. */
+  function mejorAjuste(){
+    const total = Math.max(1, cams.length + 1);                    // cámaras + casilla de añadir
+    const m = $('mosaico'), r = m.getBoundingClientRect();
+    const W = Math.max(200, m.clientWidth || window.innerWidth), H = Math.max(160, window.innerHeight - (r.top || 160) - 40);
+    const max = window.innerWidth < 600 ? 2 : 8;
+    let mejor = 1, tw = 0;
+    for (let c = 1; c <= Math.min(max, total); c++){
+      const f = Math.ceil(total / c), t = Math.min(W / c, (H / f) * 16 / 9);
+      if (t > tw + 1){ tw = t; mejor = c; }
+    }
+    return mejor;
+  }
+  let cols = columnas();
+
   function pararTodos(){ players.forEach(p => p.stop()); players.clear(); }
 
   /** Dibuja el mosaico completo (solo cuando cambian cámaras, distribución o cámara principal). */
@@ -23,14 +48,15 @@
     pararTodos(); tiles.clear();
     const m = $('mosaico'); m.innerHTML = '';
     const L = LAYOUTS[layout];
+    cols = columnas(); m.style.gridTemplateColumns = `repeat(${cols},minmax(0,1fr))`;
     const main = cams.find(c => c.id === featured) || cams[0];
     const orden = (layout === 2 && main) ? [main, ...cams.filter(c => c.id !== main.id)] : cams;
     if (!cams.length) m.innerHTML = `<div class="card empty"><div style="font-size:17px">Añade tu primera cámara</div><p class="mut small">PanelCamaras busca cámaras en la red del servidor o puedes añadirlas con su IP.</p><a class="btn" href="/camaras/nueva" style="text-decoration:none;display:inline-block">Añadir cámara</a></div>`;
     orden.forEach(c => {
       const esMain = layout === 2 && main && c.id === main.id, secundaria = layout === 2 && !esMain;
       const el = document.createElement('div');
-      el.className = 'tile' + (L.span === 2 && !esMain ? ' compact' : '');
-      el.style.gridColumn = 'span ' + (esMain ? 6 : L.span);
+      el.className = 'tile' + (layout >= 2 && !esMain ? ' compact' : '');
+      el.style.gridColumn = 'span ' + (esMain ? cols : 1);
       el.innerHTML = `<div class="nopic">Sin vista previa</div><img alt="" hidden><video muted playsinline autoplay hidden></video><span class="dot"></span><div class="tn">${esc(c.nombre)}</div>`;
       const t = { el, img: el.querySelector('img'), vid: el.querySelector('video'), dot: el.querySelector('.dot'), nopic: el.querySelector('.nopic'), live: esMain || L.live };
       tiles.set(c.id, t);
@@ -48,7 +74,7 @@
       m.appendChild(el);
     });
     const add = document.createElement('a');
-    add.className = 'tile add'; add.href = '/camaras/nueva'; add.style.gridColumn = 'span ' + (layout === 2 ? 2 : L.span);
+    add.className = 'tile add'; add.href = '/camaras/nueva'; add.style.gridColumn = 'span 1';
     add.innerHTML = '<div><b>+</b><span class="mut small">Añadir cámara</span></div>';
     m.appendChild(add);
     $('ayuda').hidden = !cams.length;
@@ -111,6 +137,9 @@
   $('bVista').onclick = e => { e.stopPropagation(); pintaMenu(); menu.hidden = !menu.hidden; };
   document.addEventListener('click', () => { menu.hidden = true; });
 
+  // Al girar el móvil o cambiar el tamaño de la ventana se redistribuyen las columnas.
+  let rz = null;
+  window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (columnas() !== cols){ render(); aplicarEstado(); previas(); } }, 200); });
   window.addEventListener('pagehide', pararTodos);
   (async () => {
     await refrescar(true);

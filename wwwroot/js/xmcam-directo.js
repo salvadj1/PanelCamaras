@@ -79,6 +79,12 @@
     }
   };
 
+  // Panel PTZ plegable (en vertical): se recuerda abierto/cerrado; en pantallas bajas empieza cerrado.
+  const sheet = $('sheet');
+  const pliega = ab => { sheet.classList.toggle('cerrado', !ab); $('sheetBtn').setAttribute('aria-expanded', String(ab)); };
+  pliega(store.get('ptz', window.innerHeight < 640 ? '0' : '1') === '1');
+  $('sheetBtn').onclick = () => { const ab = sheet.classList.contains('cerrado'); store.set('ptz', ab ? '1' : '0'); pliega(ab); };
+
   const joy = new XmJoystick($('joy'), (cmd, step) => Ptz.set(cmd, step));
   document.querySelectorAll('.hold').forEach(b => {
     b.addEventListener('pointerdown', e => { b.setPointerCapture(e.pointerId); Ptz.set(b.dataset.cmd, 5); e.preventDefault(); });

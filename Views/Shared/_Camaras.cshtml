@@ -2,12 +2,15 @@
     var tab = ViewData["Tab"] as string ?? "";
     var titulo = ViewData["Titulo"] as string ?? "Panel de cámaras";
     var volver = ViewData["Volver"] as string;
+    // Ancho: "completo" aprovecha todo el ancho (mosaico, directo, grabaciones); el resto se limita para que los formularios se lean bien.
+    var ancho = (ViewData["Ancho"] as string) == "completo" ? "completo" : "estrecho";
+    var clsBody = "xm" + (ViewData["Cam"] != null ? " cam" : "");
 }
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>@titulo · PanelCamaras</title>
 <script>
   // Aplica el tema guardado antes de pintar (evita el parpadeo).
@@ -22,13 +25,13 @@
 </script>
 <link rel="stylesheet" href="~/css/xmcam.css">
 </head>
-<body class="xm">
+<body class="@clsBody">
 <header class="appbar">
   @if (!string.IsNullOrEmpty(volver)) { <a class="back" href="@volver" aria-label="Atrás">←</a> }
   <h1>@titulo</h1>
   @RenderSection("Acciones", required: false)
 </header>
-<main class="xm-main">
+<main class="xm-main @ancho">
   @RenderBody()
 </main>
 <nav class="navbar" aria-label="Principal">
