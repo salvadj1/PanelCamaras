@@ -42,6 +42,7 @@ namespace CentroSeguridad
             services.AddHostedService(sp => sp.GetRequiredService<EstadoCamaras>());
             services.AddSingleton<Go2RtcService>();
             services.AddHostedService(sp => sp.GetRequiredService<Go2RtcService>());
+            services.AddHostedService<ServicioAnuncio>();   // mDNS (panelcamaras.local) + SSDP (pestaña Red de Windows)
         }
 
         /// <summary>
@@ -64,7 +65,7 @@ namespace CentroSeguridad
             // Equipos remotos por HTTP (7000): se envían a /acceso, que comprueba si el navegador confía en el
             // certificado HTTPS (7001). Si confía, redirige; si no, ofrece instalarlo. WebCodecs (reproductor)
             // solo funciona en contexto seguro. En localhost se deja HTTP, que ya es contexto seguro.
-            var abiertas = new[] { "/acceso", "/ping", "/certificado.crt", "/instalar-certificado.bat" };
+            var abiertas = new[] { "/acceso", "/ping", "/certificado.crt", "/instalar-certificado.bat", "/upnp.xml" };
             app.Use(async (ctx, next) =>
             {
                 var host = ctx.Request.Host.Host;
