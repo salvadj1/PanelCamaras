@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using CentroSeguridad.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -39,15 +40,18 @@ namespace CentroSeguridad
                 app.UseHsts();
             }
 
-            // Equipos remotos por HTTP (7000) -> HTTPS (7001): WebCodecs solo funciona en contexto seguro.
-            // En localhost se deja HTTP, que ya es contexto seguro.
+            // Equipos remotos por HTTP (7000): se envían a /acceso, que comprueba si el navegador confía en el
+            // certificado HTTPS (7001). Si confía, redirige; si no, ofrece instalarlo. WebCodecs (reproductor)
+            // solo funciona en contexto seguro. En localhost se deja HTTP, que ya es contexto seguro.
+            var abiertas = new[] { "/acceso", "/ping", "/certificado.crt", "/instalar-certificado.bat" };
             app.Use(async (ctx, next) =>
             {
                 var host = ctx.Request.Host.Host;
-                if (!ctx.Request.IsHttps && host != "localhost" && host != "127.0.0.1" && host != "[::1]")
-                    ctx.Response.Redirect($"https://{host}:7001{ctx.Request.Path}{ctx.Request.QueryString}");
-                else
+                bool local = host == "localhost" || host == "127.0.0.1" || host == "[::1]";
+                if (ctx.Request.IsHttps || local || abiertas.Contains(ctx.Request.Path.Value.ToLowerInvariant()))
                     await next();
+                else
+                    ctx.Response.Redirect("/acceso?ret=" + System.Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString.Value));
             });
             app.UseStaticFiles(); // sirve wwwroot (css, js)
             app.UseRouting();

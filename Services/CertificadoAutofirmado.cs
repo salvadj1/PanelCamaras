@@ -12,13 +12,24 @@ namespace CentroSeguridad.Services
     /// </summary>
     public static class CertificadoAutofirmado
     {
+        /// <summary>Último certificado cargado por ObtenerOCrear (para ofrecer su parte pública a los clientes).</summary>
+        public static X509Certificate2 Actual { get; private set; }
+
         /// <summary>
         /// Carga el certificado del archivo PFX; si no existe (o está dañado) lo crea y lo guarda.
+        /// El resultado queda disponible en <see cref="Actual"/>.
         /// </summary>
         /// <param name="archivoPfx">Ruta del archivo .pfx donde se guarda/lee el certificado.</param>
         /// <param name="password">Contraseña del PFX.</param>
         /// <returns>Certificado listo para usar en Kestrel (clave privada persistente).</returns>
         public static X509Certificate2 ObtenerOCrear(string archivoPfx, string password)
+        {
+            Actual = CargarOCrear(archivoPfx, password);
+            return Actual;
+        }
+
+        /// <summary>Lógica interna de carga/creación del PFX.</summary>
+        private static X509Certificate2 CargarOCrear(string archivoPfx, string password)
         {
             if (File.Exists(archivoPfx))
             {
