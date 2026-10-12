@@ -42,7 +42,10 @@
 
   $('cHd').onclick = () => { stream = 0; arrancar(); };
   $('cSd').onclick = () => { stream = 1; arrancar(); };
-  $('bAudio').onclick = () => { audio = !audio; arrancar(); };
+  $('bAudio').onclick = () => {
+    if (!audio && video.audio === false){ toast('Audio no disponible: falta ffmpeg en el servidor (carpeta ffmpeg)'); return; }
+    audio = !audio; arrancar();
+  };
   $('bFoto').onclick = async () => {
     setEstado('Capturando…');
     try {

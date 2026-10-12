@@ -19,6 +19,9 @@
     <!-- Los .bat se generan al lado del .exe al compilar y al publicar -->
     <None Include="IniciarServicio.bat" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Include="PararServicio.bat" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+
+    <!-- ffmpeg (audio en directo): carpeta ffmpeg\ junto al .exe al compilar y al publicar -->
+    <None Update="ffmpeg\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

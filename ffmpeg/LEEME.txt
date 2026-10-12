@@ -1,0 +1,3 @@
+ffmpeg (build "essentials" 9.0.2 de gyan.dev, licencia en LICENSE.txt).
+Coloca aqui ffmpeg.exe. Se copia junto al programa al compilar y al publicar, y PanelCamaras se lo indica a go2rtc
+para activar el audio en directo. Si falta, el panel funciona igualmente pero sin audio.

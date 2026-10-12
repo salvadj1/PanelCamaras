@@ -31,6 +31,19 @@ namespace CentroSeguridad.Services
         private readonly string _dir = Path.Combine(AppContext.BaseDirectory, "go2rtc");
         private Process _proceso;
 
+        /// <summary>Ruta del ffmpeg que acompaña al programa (carpeta ffmpeg junto al exe), o null si falta.</summary>
+        private static string RutaFfmpeg
+        {
+            get
+            {
+                string f = Path.Combine(AppContext.BaseDirectory, "ffmpeg", RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg");
+                return File.Exists(f) ? f : null;
+            }
+        }
+
+        /// <summary>true si hay ffmpeg disponible (necesario para el audio en directo).</summary>
+        public bool FfmpegDisponible => RutaFfmpeg != null;
+
         /// <summary>true cuando go2rtc está en marcha y se puede pedir vídeo.</summary>
         public bool Disponible { get; private set; }
         /// <summary>Estado en texto para mostrar al usuario.</summary>
@@ -132,6 +145,12 @@ namespace CentroSeguridad.Services
             sb.AppendLine("  listen: \"\"");
             sb.AppendLine("webrtc:");
             sb.AppendLine("  listen: \"\"");
+            if (RutaFfmpeg != null)
+            {
+                // go2rtc usa este ffmpeg para pasar el audio a AAC (streams "_a").
+                sb.AppendLine("ffmpeg:");
+                sb.AppendLine("  bin: \"" + Yaml(RutaFfmpeg) + "\"");
+            }
             sb.AppendLine("log:");
             sb.AppendLine("  level: warn");
             sb.AppendLine("streams:");

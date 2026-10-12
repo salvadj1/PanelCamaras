@@ -77,7 +77,7 @@ namespace CentroSeguridad.Controllers
                 c.Id, c.Nombre, c.Host, c.Puerto, c.Usuario, c.Canal, c.PuertoRtsp, c.PuertoHttp, c.RtspHash, c.Vigilar,
                 online = _estado.EsOnline(c.Id)
             });
-            return Ok(new { camaras, video = new { disponible = _go2rtc.Disponible, mensaje = _go2rtc.Mensaje } });
+            return Ok(new { camaras, video = new { disponible = _go2rtc.Disponible, mensaje = _go2rtc.Mensaje, audio = _go2rtc.FfmpegDisponible } });
         }
 
         /// <summary>POST /api/camaras: añade una cámara (opcionalmente probando antes el login).</summary>
