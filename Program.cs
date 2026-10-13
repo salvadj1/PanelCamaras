@@ -1,4 +1,8 @@
+using System;
+using System.IO;
+using CentroSeguridad.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 
 namespace CentroSeguridad
@@ -32,9 +36,17 @@ namespace CentroSeguridad
                 .UseWindowsService() // permite ejecutar como Servicio de Windows
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    // Escucha en todas las interfaces de red (no solo localhost)
-                    // para que otros equipos de la red local puedan acceder.
-                    webBuilder.UseUrls("http://0.0.0.0:5000");
+                    // Escucha en todas las interfaces de red (no solo localhost):
+                    //  - HTTP  7000: redirige a HTTPS a los equipos remotos.
+                    //  - HTTPS 7001: necesario para WebCodecs (reproductor) en equipos remotos,
+                    //    ya que los navegadores solo lo habilitan en contexto seguro.
+                    // El certificado autofirmado se crea la primera vez junto al .exe (PanelCamaras.pfx).
+                    webBuilder.ConfigureKestrel(k =>
+                    {
+                        k.ListenAnyIP(7000);
+                        k.ListenAnyIP(7001, o => o.UseHttps(CertificadoAutofirmado.ObtenerOCrear(
+                            Path.Combine(AppContext.BaseDirectory, "PanelCamaras.pfx"), "panelcamaras")));
+                    });
                     webBuilder.UseStartup<Startup>();
                 });
     }

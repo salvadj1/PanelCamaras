@@ -1,0 +1,6 @@
+Pestanas de la camara como iconos dentro del panel del joystick (panel fijo)
+
+Views/Camaras/Directo.cshtml - la fila Directo/Grabaciones/Ajustes/Info pasa a iconos en la parte superior del panel de controles; el panel ya no se pliega y los paneles Ajustes/Info ocupan la zona del video.
+wwwroot/js/xmcam-directo.js - se elimina el plegado del panel.
+wwwroot/js/xmcam-camajustes.js - fuera del directo se oculta la zona PTZ y queda solo la fila de iconos.
+wwwroot/css/xmcam.css - estilos del panel fijo y de los iconos; se quitan los del asa y el plegado.

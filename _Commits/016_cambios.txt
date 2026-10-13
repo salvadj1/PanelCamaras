@@ -1,0 +1,9 @@
+ffmpeg dentro del proyecto (audio en directo)
+
+PanelCamaras.csproj - la carpeta ffmpeg\ se copia junto al .exe al compilar y al publicar.
+Services/Go2RtcService.cs - detecta ffmpeg\ffmpeg.exe y se lo indica a go2rtc en go2rtc.yaml; propiedad FfmpegDisponible.
+Controllers/CamarasApiController.cs - la lista de camaras informa de si hay audio disponible (video.audio).
+wwwroot/js/xmcam-directo.js - aviso inmediato si se pide audio y falta ffmpeg.
+ffmpeg/LEEME.txt y ffmpeg/LICENSE.txt (nuevos) - instrucciones y licencia.
+.gitignore (nuevo) - evita subir ffmpeg.exe (105 MB) al repositorio.
+IMPORTANTE: este ZIP NO incluye ffmpeg.exe. Copia ffmpeg.exe (de ffmpeg-9.0.2-essentials_build\bin) dentro de la carpeta ffmpeg del proyecto.

@@ -1,0 +1,76 @@
+@{
+    Layout = "_Camaras";
+    ViewData["Titulo"] = ViewData["CamNombre"] as string ?? "Cámara";
+    ViewData["Tab"] = "camaras";
+    ViewData["Ancho"] = "completo";
+    ViewData["Cam"] = "1";
+    ViewData["Volver"] = "/";
+}
+<div class="camfull">
+<div class="cambody">
+  <div class="camarea">
+    <div id="pDirecto" class="camdirecto">
+      <div id="carrusel" class="chips"></div>
+      <div class="camstage">
+        <div class="player" id="player" data-cam="@ViewData["CamId"]">
+          <img id="snap" alt="" hidden>
+          <video id="vid" muted playsinline autoplay></video>
+          <span class="badge live">EN VIVO</span><span class="badge q" id="bQ">SD</span>
+        </div>
+        <p id="estado" class="small estado"></p>
+      </div>
+    </div>
+<div id="pAjustes" class="campanel" hidden>
+      <h2 class="sec">En esta app</h2>
+      <div class="setrow"><div><div>Vigilar alarmas de esta cámara</div><div class="mut small">El servidor escucha sus eventos aunque no tengas la web abierta.</div></div><label class="switch"><input type="checkbox" id="cVigilar"><i></i></label></div>
+      <div class="setrow"><div><div>RTSP con hash XM</div><div class="mut small">Actívalo si el vídeo no abre con tu contraseña normal.</div></div><label class="switch"><input type="checkbox" id="cHash"><i></i></label></div>
+      <h2 class="sec">Ajustes de la cámara</h2>
+      <div id="bloques"></div>
+      <div class="card" style="margin:10px 0"><div class="mut small">Otro bloque (avanzado)</div>
+        <div class="row"><input class="inp" id="bloqueOtro" placeholder="p. ej. Detect.BlindDetect" style="flex:1"><button class="btn tonal" id="bloqueIr" type="button">Abrir</button></div></div>
+      <h2 class="sec">Acciones</h2>
+      <div class="row"><button class="btn tonal" id="bHora" type="button">Sincronizar hora</button><button class="btn tonal" id="bReinicio" type="button">Reiniciar cámara</button></div>
+    </div>
+    <div id="pInfo" class="campanel" hidden>
+      <div class="card" style="margin:10px 0"><div class="row" style="justify-content:space-between"><b id="iNombre"></b><button class="btn tonal" id="bNombre" type="button">Cambiar nombre</button></div></div>
+      <h2 class="sec">Conexión</h2><div class="card small" id="iConex"></div>
+      <h2 class="sec">Sistema</h2><div class="card small" id="iSis">Cargando…</div>
+    </div>
+  </div>
+  <section class="sheet" id="sheet" aria-label="Controles de la cámara">
+    <div class="tabs camtabs" id="tabs">
+      <a href="#" class="sel" data-p="directo" title="Directo" aria-label="Directo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg></a>
+      <a href="/camara/@ViewData["CamId"]/sd" title="Grabaciones de la SD" aria-label="Grabaciones de la SD"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/></svg></a>
+      <a href="#" data-p="ajustes" title="Ajustes" aria-label="Ajustes"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></a>
+      <a href="#" data-p="info" title="Información" aria-label="Información"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></a>
+    </div>
+    <div class="ptzzone">
+      <div class="row" style="margin:2px 0">
+        <button class="chip" id="cHd" type="button">HD</button>
+        <button class="chip" id="cSd" type="button">SD</button>
+        <span class="sp"></span>
+        <button class="btn tonal" id="bAudio" type="button">Sin audio</button>
+        <button class="btn tonal" id="bFoto" type="button">Foto</button>
+      </div>
+      <div class="ptzbox">
+        <canvas id="joy" aria-label="Joystick PTZ"></canvas>
+        <div class="grid2">
+          <button class="hold" data-cmd="ZoomTile" type="button">Z+</button>
+          <button class="hold" data-cmd="ZoomWide" type="button">Z−</button>
+          <button class="hold" data-cmd="FocusFar" type="button">F+</button>
+          <button class="hold" data-cmd="FocusNear" type="button">F−</button>
+        </div>
+      </div>
+      <p class="small mut" style="margin:2px">Posiciones: toca para ir · mantén para guardar la actual</p>
+      <div class="presets" id="presets"></div>
+    </div>
+  </section>
+</div>
+</div>
+@section Scripts {
+  <script src="~/js/xmcam-live.js"></script>
+  <script src="~/js/xmcam-joystick.js"></script>
+  <script src="~/js/xmcam-schemas.js"></script>
+  <script src="~/js/xmcam-directo.js"></script>
+  <script src="~/js/xmcam-camajustes.js"></script>
+}

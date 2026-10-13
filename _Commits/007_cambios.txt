@@ -1,0 +1,11 @@
+CAMBIO DE PUERTOS A 7000 (HTTP) Y 7001 (HTTPS)
+
+Motivo: el puerto 5001 estaba ocupado por otro programa (javaw.exe) y las conexiones a la IP del equipo no llegaban a PanelCamaras.
+
+Program.cs
+  - Kestrel escucha en HTTP 7000 y HTTPS 7001.
+Startup.cs
+  - La redireccion HTTP->HTTPS apunta al puerto 7001.
+IniciarServicio.bat
+  - Reglas de firewall para 7000 y 7001; elimina las reglas antiguas (5000 y 5001).
+  - Mensajes finales con las nuevas URL: http://localhost:7000 y https://IP-DE-ESTE-PC:7001.

@@ -1,0 +1,21 @@
+RUTAS DE GRABACIONES EN EL SERVIDOR (ACCESO DESDE CUALQUIER PC SIN INSTALAR NADA)
+
+appsettings.json (nuevo)
+  - Seccion "RutaDeGrabaciones": lista de {Nombre, Ruta}. Ruta vacia = ignorada. Admite rutas locales y UNC.
+Models/RutaGrabacion.cs (nuevo)
+  - Clase con Nombre y Ruta.
+Services/AlmacenGrabaciones.cs (nuevo)
+  - Lee las rutas, lista archivos permitidos (.h264/.jpg/.jpeg/.png/.bmp/.webp) y resuelve archivos con proteccion contra path traversal.
+Controllers/ApiController.cs (nuevo)
+  - GET /api/rutas, /api/indice?ruta=X, /api/archivo?ruta=X&p=... (con soporte Range).
+Startup.cs
+  - Registra AlmacenGrabaciones como singleton.
+PanelCamaras.csproj
+  - appsettings*.json se copia a la salida y a la publicacion.
+Views/Home/Index.cshtml
+  - Selector de rutas (#rutaSel) en la cabecera y textos de la pantalla inicial actualizados.
+wwwroot/js/centroseguridad.js
+  - Sustituido showDirectoryPicker por handles remotos (fetch a /api); walk() y el resto no cambian.
+  - openFolder/loadSaved cargan las rutas del servidor y recuerdan la ultima en IndexedDB.
+  - Calculo de tamanos usa el tamano del indice (no descarga cada archivo).
+Nota: el servicio necesita un usuario con acceso de lectura para rutas de red (\\NAS\...).

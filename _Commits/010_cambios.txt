@@ -1,0 +1,4 @@
+CORRECCION: LAS VISTAS DE CAMARAS SE MOSTRABAN SIN PLANTILLA (SIN CSS NI JS)
+
+Views/Camaras/Index.cshtml, Nueva.cshtml, Directo.cshtml, Ajustes.cshtml
+  - Anadido Layout = "_Camaras"; (Views/_ViewStart.cshtml lo deja a null por defecto y las vistas no lo sobrescribian).

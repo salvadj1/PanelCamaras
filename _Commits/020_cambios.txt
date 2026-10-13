@@ -1,0 +1,8 @@
+Barra superior unificada (estilo 1) y nombre Panel Camaras
+
+Views/Shared/_Camaras.cshtml: logo cuadrado azul + "Panel Camaras"; titulo de pagina "· Panel Camaras".
+Views/Shared/_Barra.cshtml: cada pestaña lleva icono + texto (el texto se oculta en movil).
+Views/Home/Index.cshtml: la cabecera de /grabaciones usa el mismo logo y nombre.
+Controllers/HomeController.cs: comentario con el nuevo nombre.
+IniciarServicio.bat: la regla de firewall se llama "Panel Camaras (5000)".
+wwwroot/css/xmcam.css y centroseguridad.css: estilos .lg, pestañas centradas, texto oculto en movil.

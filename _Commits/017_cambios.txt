@@ -1,0 +1,5 @@
+PararServicio.bat renombrado a DetenerServicio.bat
+
+DetenerServicio.bat (antes PararServicio.bat) - mismo contenido, nuevo nombre.
+PanelCamaras.csproj - se copia DetenerServicio.bat junto al .exe.
+NOTA: borra el PararServicio.bat antiguo de la carpeta de salida si ya existe.

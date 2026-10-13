@@ -1,0 +1,26 @@
+@{
+    Layout = "_Camaras";
+    ViewData["Ancho"] = "completo";
+    ViewData["Titulo"] = "PanelCamaras";
+    ViewData["Tab"] = "camaras";
+}
+@section Acciones {
+  <a class="ib" href="/camaras/nueva" title="Añadir cámara" aria-label="Añadir cámara"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>
+  <div style="position:relative">
+    <button class="btn txt" id="bVista" type="button">Vista</button>
+    <div id="menuVista" class="card" hidden style="position:absolute;right:0;top:44px;z-index:30;min-width:240px;padding:6px"></div>
+  </div>
+}
+<div class="card summary" id="resumen">
+  <div><b id="kOn">–</b><span class="mut small">En línea</span></div>
+  <div><b id="kTot">–</b><span class="mut small">Cámaras</span></div>
+  <a href="/eventos" style="text-decoration:none;color:inherit"><b id="kEv">–</b><span class="mut small">Eventos hoy</span></a>
+  <a href="/reglas" style="text-decoration:none;color:inherit"><b id="kPerfil">–</b><span class="mut small">Perfil</span></a>
+</div>
+<div id="avisoVideo" class="card mut small" hidden style="margin-top:8px"></div>
+<div id="mosaico" class="mosaic"></div>
+<p id="ayuda" class="mut small" hidden></p>
+@section Scripts {
+  <script src="~/js/xmcam-live.js"></script>
+  <script src="~/js/xmcam-mosaico.js"></script>
+}

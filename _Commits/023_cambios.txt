@@ -1,0 +1,6 @@
+Direccion recomendada en Ajustes y solo SSDP
+
+Controllers/SistemaApiController.cs: /api/sistema devuelve el nombre del PC y sus IPv4.
+Views/Camaras/Ajustes.cshtml y wwwroot/js/xmcam-ajustes.js: Red muestra https://NOMBRE-DEL-PC:7001 con botones Copiar y Abrir, y las direcciones por IP.
+Services/ServicioAnuncio.cs: se quita mDNS; queda SSDP (pestana Red de Windows).
+IniciarServicio.bat: la regla de firewall UDP pasa a solo 1900 y el mensaje final usa el nombre del PC.

@@ -1,0 +1,3 @@
+Cerrar go2rtc huerfanos al arrancar (exe y servicio)
+
+Services/Go2RtcService.cs - CerrarHuerfanos(): antes de lanzar go2rtc cierra los go2rtc.exe abiertos desde nuestra carpeta por un arranque anterior; ademas Detener() al terminar el proceso (ProcessExit). Soluciona "mse: stream not found" por un go2rtc antiguo ocupando el puerto 1984.

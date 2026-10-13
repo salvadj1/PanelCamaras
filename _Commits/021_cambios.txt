@@ -1,0 +1,11 @@
+Ajustes completos, alertas con video, mosaico en HD y miniaturas en el servidor
+
+Views/Camaras/Ajustes.cshtml y wwwroot/js/xmcam-ajustes.js: ajustes por secciones (General, Video, Avisos, Almacenamiento, Red y certificado, Sistema, Copia de seguridad).
+Controllers/SistemaApiController.cs (nuevo): /api/sistema, reiniciar go2rtc, borrar miniaturas, exportar/importar copia (reglas y perfiles).
+Services/Go2RtcService.cs: metodo Reiniciar().
+wwwroot/js/xmcam-eventos.js: cada evento es un enlace al video (/camara/{id}/sd?t=hora).
+wwwroot/js/xmcam-avisos.js y xmcam.js: tocar el aviso o la notificacion abre el video; interruptor de avisos.
+wwwroot/js/xmcam-sd.js: enlace ?t= abre el clip del momento (3 s antes); miniaturas guardadas en el servidor en vez de IndexedDB por navegador, sin limite de 30 ni URLs temporales.
+Controllers/SdApiController.cs: GET/PUT /api/camaras/{id}/sd/mini (cache JPEG en datos/miniaturas).
+wwwroot/js/xmcam-mosaico.js: mosaico en HD (Auto: HD hasta 4 camaras, SD con mas; configurable).
+wwwroot/css/xmcam.css: estilos del menu de ajustes y filas de eventos.

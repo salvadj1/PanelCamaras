@@ -1,0 +1,15 @@
+Fase 3: alarmas, reglas, perfiles y eventos
+
+Services/Alarmas/Modelos.cs (nuevo) - Regla, Accion, EventoRec, AlarmaEvento y etiquetas de eventos.
+Services/Alarmas/AlmacenReglas.cs (nuevo) - guarda reglas, perfiles, ajustes e historial (datos/*.json) y fotos (datos/snaps).
+Services/Alarmas/MotorReglas.cs (nuevo) - evalua reglas (camara, evento, inicio, horario, perfil, anti-spam) y ejecuta foto, PTZ, URL y aviso.
+Services/Alarmas/ServicioAlarmas.cs (nuevo) - vigilancia en segundo plano: sesion DVRIP por camara con "Vigilar" y servidor TCP en el puerto 15002.
+Controllers/AlarmasApiController.cs (nuevo) - API de reglas, perfiles, foto automatica y eventos.
+Controllers/AlarmasController.cs (nuevo) - paginas /eventos, /reglas, /reglas/{id}.
+Startup.cs - registro de los servicios de alarmas.
+Views/Alarmas/Eventos|Reglas|Regla.cshtml (nuevos) - pantallas.
+Views/Shared/_Camaras.cshtml - pestana Eventos en la barra inferior y script de avisos.
+Views/Camaras/Index.cshtml - resumen con eventos de hoy y perfil activo.
+wwwroot/js/xmcam-eventos.js, xmcam-reglas.js, xmcam-regla.js, xmcam-avisos.js (nuevos) - logica de las pantallas y avisos del navegador.
+wwwroot/js/xmcam-mosaico.js - resumen de eventos/perfil.
+NOTA: abrir el puerto 15002 en el firewall solo si las camaras empujan alarmas al servidor.

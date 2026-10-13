@@ -1,4 +1,9 @@
+using System;
+using System.IO;
+using System.Linq;
+using CentroSeguridad.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,6 +23,26 @@ namespace CentroSeguridad
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddSingleton<AlmacenGrabaciones>(); // lee RutaDeGrabaciones de appsettings.json
+
+            // Cámaras XM: contraseñas cifradas con Data Protection (claves en datos/keys, protegidas con DPAPI).
+            services.AddDataProtection()
+                .SetApplicationName("PanelCamaras")
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "datos", "keys")))
+                .ProtectKeysWithDpapi(protectToLocalMachine: true);
+            services.AddSingleton<AlmacenCamaras>();
+            services.AddSingleton<PtzService>();
+            services.AddSingleton<ControlCamaras>();
+            services.AddSingleton<ServicioSd>();
+            services.AddSingleton<CentroSeguridad.Services.Alarmas.AlmacenReglas>();
+            services.AddSingleton<CentroSeguridad.Services.Alarmas.MotorReglas>();
+            services.AddSingleton<CentroSeguridad.Services.Alarmas.ServicioAlarmas>();
+            services.AddHostedService(sp => sp.GetRequiredService<CentroSeguridad.Services.Alarmas.ServicioAlarmas>());
+            services.AddSingleton<EstadoCamaras>();
+            services.AddHostedService(sp => sp.GetRequiredService<EstadoCamaras>());
+            services.AddSingleton<Go2RtcService>();
+            services.AddHostedService(sp => sp.GetRequiredService<Go2RtcService>());
+            services.AddHostedService<ServicioAnuncio>();   // mDNS (panelcamaras.local) + SSDP (pestaña Red de Windows)
         }
 
         /// <summary>
@@ -37,16 +62,26 @@ namespace CentroSeguridad
                 app.UseHsts();
             }
 
-            // UseHttpsRedirection eliminado: la app solo sirve HTTP (puerto 5000)
-            // y la redirección a un puerto HTTPS inexistente rompía el acceso en red.
+            // Equipos remotos por HTTP (7000): se envían a /acceso, que comprueba si el navegador confía en el
+            // certificado HTTPS (7001). Si confía, redirige; si no, ofrece instalarlo. WebCodecs (reproductor)
+            // solo funciona en contexto seguro. En localhost se deja HTTP, que ya es contexto seguro.
+            var abiertas = new[] { "/acceso", "/ping", "/certificado.crt", "/instalar-certificado.bat", "/upnp.xml" };
+            app.Use(async (ctx, next) =>
+            {
+                var host = ctx.Request.Host.Host;
+                bool local = host == "localhost" || host == "127.0.0.1" || host == "[::1]";
+                if (ctx.Request.IsHttps || local || abiertas.Contains(ctx.Request.Path.Value.ToLowerInvariant()))
+                    await next();
+                else
+                    ctx.Response.Redirect("/acceso?ret=" + System.Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString.Value));
+            });
+            app.UsarProxyLive();  // /live/ws -> go2rtc (vídeo en directo)
             app.UseStaticFiles(); // sirve wwwroot (css, js)
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllers(); // rutas por atributo: /, /camara/{id}, /grabaciones, /api/...
             });
         }
     }

@@ -20,6 +20,8 @@
   header .ib{padding:3px 6px}
   .logo{display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px;color:var(--acc)}
   .logo span{color:var(--fg)}
+  .gnav{display:flex;gap:2px}
+  .gnav .ib{padding:3px 6px;text-decoration:none}
   .search{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--bd);border-radius:8px;padding:0 10px;color:var(--mut);min-width:220px}
   .search input{background:none;border:0;padding:3px 0;width:100%;outline:none}
   #stat{color:var(--mut);font-size:12px}
@@ -154,3 +156,8 @@
   @media(max-height:620px){.kpi .s,.spark{display:none}}
   @media(max-width:900px){body{height:auto;overflow:auto}main{overflow:visible}#dash{height:auto}.lay{height:auto;min-height:0;grid-template-columns:1fr;grid-template-rows:none}#pl,#tlc,.cal,#side,.kpis{grid-column:1;grid-row:auto}#pl{order:0}#tlc{order:1}.cal{order:2}#side{order:3}.kpis{order:4}#pl .vbox{flex:none;aspect-ratio:16/9}#list{flex:none;max-height:420px}}
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.lg{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:#3b82f6;color:#fff;font-style:normal}
+.lg+span{color:var(--fg)}
+.gnav{margin:0 auto}.gnav .ib{padding:6px 12px;gap:8px;font-size:14px}
+@media (max-width:640px){.gnav .tx{display:none}.gnav .ib{padding:6px 9px}}

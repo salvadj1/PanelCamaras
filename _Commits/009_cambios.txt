@@ -1,0 +1,34 @@
+FASE 1: PANEL DE CAMARAS XM/iCSee (MOSAICO, DIRECTO, PTZ) PORTADO DE LA APP ANDROID XMCam
+
+La pagina de inicio (/) pasa a ser el mosaico de camaras; las grabaciones siguen en /grabaciones sin cambios.
+
+Services/Xm/XmProtocolo.cs, XmCrypto.cs, DvripClient.cs, XmDiscovery.cs, XmDiagnostics.cs, PtzController.cs (nuevos)
+  - Port a C# del protocolo XM/DVRIP: login, PTZ, busqueda UDP en la LAN, diagnostico por capas y controlador de joystick
+    (sin esperar respuestas, conflated ~16/s, keepalive, parada doble y parada automatica si se pierde la orden de parar).
+Models/CamaraXm.cs (nuevo)
+  - Camara con URLs RTSP (HD/SD, hash XM opcional) y de captura JPEG.
+Services/AlmacenCamaras.cs (nuevo)
+  - Guarda datos/camaras.json junto al .exe; contrasenas cifradas con Data Protection (claves en datos/keys, DPAPI del equipo).
+Services/EstadoCamaras.cs (nuevo)
+  - Comprueba cada 4 s si cada camara esta en linea.
+Services/PtzService.cs (nuevo)
+  - Un controlador PTZ por camara (se cierra tras 60 s de inactividad) y presets con conexion propia.
+Services/Go2RtcService.cs, Go2RtcProxy.cs (nuevos)
+  - Lanza go2rtc (descarga go2rtc.exe de GitHub la primera vez en la carpeta "go2rtc"), genera su configuracion y lo reinicia
+    al cambiar las camaras. El navegador recibe el video por MSE a traves del WebSocket /live/ws (mismo puerto HTTPS).
+Controllers/CamarasController.cs, CamarasApiController.cs (nuevos)
+  - Paginas: /, /camaras/nueva, /camara/{id}, /ajustes. API: /api/camaras (lista, alta, baja, buscar, diagnostico, ptz, preset, captura).
+Controllers/HomeController.cs
+  - La pagina de grabaciones pasa a la ruta /grabaciones.
+Startup.cs
+  - Servicios nuevos, Data Protection, proxy /live/ws y rutas por atributo (MapControllers).
+Views/Shared/_Camaras.cshtml, Views/Camaras/Index|Nueva|Directo|Ajustes.cshtml (nuevos)
+  - Mosaico (4 distribuciones), anadir camara, directo con joystick/zoom/enfoque/6 presets/foto/HD-SD/audio, ajustes (5 temas).
+Views/Home/Index.cshtml
+  - Enlace "Camaras" para volver al mosaico.
+wwwroot/css/xmcam.css, wwwroot/js/xmcam*.js (nuevos)
+  - Diseno y logica de la web (temas de XMCam, reproductor MSE, joystick en canvas).
+
+Notas:
+  - Audio en directo: requiere ffmpeg disponible para go2rtc; si no, la web vuelve al video sin audio.
+  - Sin PIN por ahora (pendiente). Fases siguientes: ajustes/info de camara, alarmas y reglas, grabaciones de la SD.

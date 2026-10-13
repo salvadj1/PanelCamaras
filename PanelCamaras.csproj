@@ -13,9 +13,15 @@
     <!-- Copia wwwroot junto al .exe al compilar (el servicio arranca desde bin, no desde el proyecto) -->
     <Content Update="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
 
+    <!-- appsettings.json (RutaDeGrabaciones) junto al .exe, editable sin recompilar -->
+    <Content Update="appsettings*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+
     <!-- Los .bat se generan al lado del .exe al compilar y al publicar -->
     <None Include="IniciarServicio.bat" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="PararServicio.bat" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="DetenerServicio.bat" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+
+    <!-- ffmpeg (audio en directo): carpeta ffmpeg\ junto al .exe al compilar y al publicar -->
+    <None Update="ffmpeg\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

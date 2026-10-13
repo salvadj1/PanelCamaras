@@ -1,0 +1,13 @@
+Fase 4: grabaciones de la tarjeta SD
+
+Services/Xm/XmProtocolo.cs - IDs PbCtrl, PbClaim, PbData.
+Services/Xm/DvripClient.cs - QueryFilesRaw (lista de la SD) y DescargarClip (Claim, DownloadStart, datos, DownloadStop).
+Services/ServicioSd.cs (nuevo) - listado por dia y descarga con turno por camara y cancelacion.
+Controllers/SdApiController.cs (nuevo) - GET /api/camaras/{id}/sd y /sd/clip (con validacion de datos).
+Controllers/CamarasController.cs - pagina /camara/{id}/sd.
+Startup.cs - registro de ServicioSd.
+Views/Camaras/Sd.cshtml (nuevo) - dias, rejilla de clips y reproductor.
+Views/Camaras/Directo.cshtml - la pestana Grabaciones abre las de la SD de esa camara.
+wwwroot/js/xmcam-clip.js (nuevo) - analisis XM H.264/H.265, audio A-law, miniaturas y reproductor WebCodecs.
+wwwroot/js/xmcam-sd.js (nuevo) - logica de la pagina (miniaturas en IndexedDB, foto de alarma, reproductor).
+wwwroot/css/xmcam.css - estilos de la rejilla y del reproductor.

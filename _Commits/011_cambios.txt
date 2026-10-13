@@ -1,0 +1,16 @@
+Fase 2: ajustes e información de la cámara
+
+Services/Xm/DvripClient.cs - SystemInfo, GetTime/SetTime, Reboot, GetConfigRaw/SetConfigRaw.
+Models/CamaraXm.cs - campo Vigilar.
+Services/AlmacenCamaras.cs - Vigilar persistido y método Actualizar.
+Services/ControlCamaras.cs (nuevo) - sesiones DVRIP cortas para operaciones puntuales.
+Startup.cs - registro de ControlCamaras.
+Controllers/CamarasApiController.cs - PATCH cámara, info, config GET/PUT, hora, reiniciar.
+Controllers/CamarasController.cs - ruta /camara/{id}/config.
+Views/Camaras/Directo.cshtml - pestañas Directo/Ajustes/Info con paneles.
+Views/Camaras/Config.cshtml (nuevo) - pantalla de edición de un bloque.
+wwwroot/js/xmcam-schemas.js (nuevo) - esquemas de los 16 bloques y utilidades.
+wwwroot/js/xmcam-config.js (nuevo) - editor de bloque (guardar, releer, rechazados).
+wwwroot/js/xmcam-camajustes.js (nuevo) - pestañas Ajustes e Info.
+wwwroot/js/xmcam.js - diálogo pedirTexto.
+wwwroot/css/xmcam.css - estilos de campos y tarjetas de bloque.

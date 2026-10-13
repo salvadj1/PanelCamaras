@@ -1,0 +1,10 @@
+Web adaptable a cualquier pantalla y distribucion 5 en la camara
+
+Views/Shared/_Camaras.cshtml - clases de pagina (ancho completo o estrecho, pantalla de camara) y viewport-fit.
+Views/Camaras/Index.cshtml - ancho completo.
+Views/Camaras/Sd.cshtml - ancho completo.
+Views/Camaras/Directo.cshtml - distribucion 5: video a todo el alto libre, panel PTZ plegable abajo, pestanas inferiores.
+wwwroot/css/xmcam.css - diseno adaptable: navegacion lateral en pantallas anchas o apaisadas, PTZ al lado del video en horizontal y PC, margenes y casillas que usan todo el ancho.
+wwwroot/js/xmcam-mosaico.js - columnas segun ancho y numero de camaras (casillas lo mas grandes posible) y recalculo al girar o redimensionar.
+wwwroot/js/xmcam-directo.js - plegado del panel PTZ recordado entre visitas.
+NOTA: la pagina /grabaciones (carpeta del servidor) conserva su propio diseno.

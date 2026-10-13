@@ -1,0 +1,6 @@
+Anuncio del panel en la red (panelcamaras.local y pestana Red de Windows)
+
+Services/ServicioAnuncio.cs (nuevo): responde por mDNS a panelcamaras.local y por SSDP/UPnP (UDP 5353 y 1900).
+Controllers/AnuncioController.cs (nuevo): /upnp.xml, ficha del dispositivo con enlace a https://host:7001.
+Startup.cs: registra el servicio y deja /upnp.xml accesible por HTTP.
+IniciarServicio.bat: regla de firewall UDP 5353,1900 y mensaje con la nueva direccion.

@@ -1,0 +1,12 @@
+Barra superior unica en toda la web y certificado en Ajustes
+
+Views/Shared/_Barra.cshtml (nuevo) - iconos de navegacion comunes (Camaras, Grabaciones, Eventos, Ajustes).
+Views/Shared/_Camaras.cshtml - barra fina fija arriba (logo, iconos, titulo, acciones, tema); se elimina la barra inferior/lateral.
+Views/Home/Index.cshtml - la cabecera de Grabaciones usa los mismos iconos de navegacion.
+Views/Camaras/Index.cshtml - boton "+" discreto en la barra y pestana activa "camaras".
+Views/Camaras/Directo.cshtml, Config.cshtml, Nueva.cshtml - pestana activa "camaras".
+Views/Camaras/Ajustes.cshtml - nueva seccion "Certificado de seguridad" (asistente, .crt e instalador .bat).
+wwwroot/css/xmcam.css - estilos de la barra unica; se quitan los de la barra inferior y lateral.
+wwwroot/css/centroseguridad.css - estilo de los iconos de navegacion en la cabecera de Grabaciones.
+wwwroot/js/xmcam-mosaico.js - se quita la casilla grande de anadir camara.
+wwwroot/js/xmcam-ajustes.js - estado de la conexion (HTTP/HTTPS).

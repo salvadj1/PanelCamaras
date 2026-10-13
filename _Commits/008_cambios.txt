@@ -1,0 +1,11 @@
+PAGINA DE ACCESO: DETECTA SI EL NAVEGADOR CONFIA EN EL CERTIFICADO Y OFRECE INSTALARLO
+
+Controllers/CertificadoController.cs (nuevo)
+  - /acceso (pagina de deteccion), /ping, /certificado.crt (solo parte publica) e /instalar-certificado.bat (instalador en Root, requiere administrador).
+Views/Certificado/Acceso.cshtml (nuevo)
+  - Prueba fetch a https://host:7001/ping; si funciona redirige a HTTPS, si falla muestra la guia de instalacion, "Reintentar" y "Continuar sin instalar (con aviso)".
+Services/CertificadoAutofirmado.cs
+  - Nueva propiedad Actual con el ultimo certificado cargado (para exportar su parte publica).
+Startup.cs
+  - Los equipos remotos por HTTP se envian a /acceso?ret=... (rutas /acceso, /ping, /certificado.crt e /instalar-certificado.bat quedan abiertas por HTTP).
+Nota: Firefox usa su propio almacen de certificados y solo admite "continuar con aviso".

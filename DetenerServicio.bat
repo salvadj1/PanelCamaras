@@ -1,6 +1,6 @@
 @echo off
 rem ============================================================
-rem  PararServicio.bat
+rem  DetenerServicio.bat
 rem  Quita el inicio AUTOMATICO del servicio "PanelCamaras" (pasa a
 rem  manual) y despues lo detiene. Requiere administrador.
 rem  (No lo elimina. IniciarServicio.bat vuelve a ponerlo en automatico.)

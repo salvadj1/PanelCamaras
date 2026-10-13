@@ -1,0 +1,11 @@
+HTTPS PARA QUE EL REPRODUCTOR (WebCodecs) FUNCIONE EN OTROS PC
+
+Services/CertificadoAutofirmado.cs (nuevo)
+  - Crea/reutiliza PanelCamaras.pfx (RSA 2048, 10 anos, SAN: localhost, nombre del equipo e IPs locales).
+Program.cs
+  - Sustituido UseUrls por ConfigureKestrel: HTTP 5000 y HTTPS 5001 con el certificado autofirmado.
+Startup.cs
+  - Los equipos remotos que entran por HTTP se redirigen a https://host:5001 (localhost se queda en HTTP).
+IniciarServicio.bat
+  - Regla de firewall para el puerto 5001 y mensaje final con la URL HTTPS.
+Nota: la primera vez, cada PC debe aceptar el aviso del certificado (Avanzado > Continuar).

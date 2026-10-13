@@ -1,0 +1,15 @@
+@{
+    Layout = "_Camaras";
+    ViewData["Titulo"] = "Configuración";
+    ViewData["Tab"] = "camaras";
+    ViewData["Volver"] = "/camara/" + ViewData["CamId"] + "?panel=ajustes";
+}
+<div id="cfg" data-cam="@ViewData["CamId"]"><p class="mut">Cargando…</p></div>
+<div class="row" style="margin:14px 0">
+  <button class="btn tonal" id="bRec" type="button">Recargar</button>
+  <button class="btn" id="bGuardar" type="button">Guardar</button>
+</div>
+@section Scripts {
+  <script src="~/js/xmcam-schemas.js"></script>
+  <script src="~/js/xmcam-config.js"></script>
+}

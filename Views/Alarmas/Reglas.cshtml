@@ -1,0 +1,18 @@
+@{
+    Layout = "_Camaras";
+    ViewData["Titulo"] = "Reglas de alarma";
+    ViewData["Tab"] = "eventos";
+    ViewData["Volver"] = "/eventos";
+}
+@section Acciones {
+  <button class="btn txt" id="bPerfiles" type="button">Perfiles</button>
+}
+<h2 class="sec">Perfil activo</h2>
+<div class="row" id="perfiles" style="flex-wrap:wrap"></div>
+<div class="setrow"><div><div>Foto automática en cada alarma</div><div class="mut small">Sirve de miniatura en Eventos aunque ninguna regla la pida.</div></div><label class="switch"><input type="checkbox" id="sFoto"><i></i></label></div>
+<h2 class="sec">Reglas</h2>
+<div id="reglas"></div>
+<a class="btn" href="/reglas/nueva" style="text-decoration:none;display:inline-block;margin:10px 0">+ Nueva regla</a>
+@section Scripts {
+  <script src="~/js/xmcam-reglas.js"></script>
+}
