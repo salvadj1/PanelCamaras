@@ -43,24 +43,27 @@
     if (sch) for (const s of sch.sections){
       const campos = s.fields.filter(f => S.getPath(base, f.key) !== undefined);
       if (!campos.length) continue;
+      h += '<div class="cfg-card">';
       if (s.title) h += `<h3 class="sec">${esc(s.title)}</h3>`;
       for (const f of campos){
         usadas.add(f.key);
-        h += `<div class="cfg-f"><div class="setrow" style="padding:0"><div>${esc(f.title)}</div>${f.kind.t === 'toggle' ? control(hoja(f.key), f.kind) : ''}</div><div class="h">${esc(f.help)}</div>${f.kind.t === 'toggle' ? '' : control(hoja(f.key), f.kind)}</div>`;
+        const tog = f.kind.t === 'toggle';
+        h += `<div class="cfg-f${tog ? ' tog' : ''}"><div class="tx"><div class="t">${esc(f.title)}</div><div class="h">${esc(f.help)}</div></div><div class="ctl">${control(hoja(f.key), f.kind)}</div></div>`;
       }
+      h += '</div>';
     }
     // Avanzado: el resto de valores simples (máx. 300), aplicando el filtro de la tarjeta si lo hay
     let rest = hojas.filter(x => !usadas.has(clave(x)) && (!filter || filter.test(clave(x))));
     const total = rest.length;
     rest = rest.slice(0, 300);
     if (rest.length){
-      h += `<details style="margin-top:14px"><summary class="sec">Avanzado (${total})</summary>`;
+      h += `<details style="margin-top:14px"><summary class="sec">Avanzado (${total})</summary><div class="cfg-card">`;
       for (const x of rest){
-        const k0 = clave(x), last = String(x.path[x.path.length - 1]);
-        const ctl = typeof x.orig === 'boolean' ? control(x, { t: 'toggle' }) : control(x, { t: 'str' });
-        h += `<div class="cfg-f"><div>${esc(S.friendly(last))}</div><div class="h">${esc(k0)}</div>${ctl}</div>`;
+        const k0 = clave(x), last = String(x.path[x.path.length - 1]), esBool = typeof x.orig === 'boolean';
+        const ctl = esBool ? control(x, { t: 'toggle' }) : control(x, { t: 'str' });
+        h += `<div class="cfg-f${esBool ? ' tog' : ''}"><div class="tx"><div class="t">${esc(S.friendly(last))}</div><div class="k">${esc(k0)}</div></div><div class="ctl">${ctl}</div></div>`;
       }
-      h += '</details>';
+      h += '</div></details>';
     }
     $('cfg').innerHTML = h;
     $('cfg').querySelectorAll('input[type=range]').forEach(r => r.oninput = () => {
@@ -84,6 +87,14 @@
     });
     return { nuevo, tocadas };
   }
+
+  /** Marca con una barra lateral los ajustes que has cambiado y aún no se han guardado. */
+  function marcar(){
+    const cambiadas = new Set(recoger().tocadas.map(t => clave(t.h)));
+    $('cfg').querySelectorAll('[data-k]').forEach(el => { const f = el.closest('.cfg-f'); if (f) f.classList.toggle('chg', cambiadas.has(el.dataset.k)); });
+  }
+  $('cfg').addEventListener('input', marcar);
+  $('cfg').addEventListener('change', marcar);
 
   async function cargar(){
     try { base = await api(url()); pintar(); } catch (x) { $('cfg').innerHTML = `<p class="mut">${esc(x.message)}</p>`; }

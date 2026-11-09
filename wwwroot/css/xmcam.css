@@ -170,3 +170,50 @@ body.cam .xm-main{display:flex;flex-direction:column;min-height:0;padding-bottom
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px}
 .kv b{font-weight:500;color:var(--on-surface-variant)}
 .evt:hover{background:var(--secondary-container)}
+
+/* ===== 024: legibilidad de la configuración y compatibilidad móvil ===== */
+input,select,textarea,.inp{font-size:16px}  /* 16 px evita el zoom automático de iPhone al tocar un campo */
+.inp,.cfg-f input[type=text],.cfg-f input[type=password],.cfg-f select{min-height:44px;box-sizing:border-box;background:var(--surface-variant);border:1px solid var(--outline);border-radius:8px;padding:8px 12px;color:var(--fg)}
+.xm-main{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+.topbar{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-top:max(4px,env(safe-area-inset-top));flex-wrap:nowrap}
+.acc{display:flex;align-items:center;gap:8px}
+#bMas{display:none}
+/* tarjetas de configuración */
+.cfg-card{background:var(--surface-variant);border-radius:14px;padding:6px 14px;margin:12px 0}
+.cfg-card h3.sec{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--primary);margin:10px 0 2px}
+.cfg-f{padding:12px 0;border-bottom:1px solid var(--outline);overflow-wrap:anywhere}
+.cfg-card .cfg-f:last-child{border-bottom:0}
+.cfg-f .t{font-size:15px;font-weight:600;color:var(--fg)}
+.cfg-f .h{font-size:13px;line-height:1.35;color:var(--fg);opacity:.75;margin-top:2px}
+.cfg-f .k{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--fg);opacity:.6;margin-top:2px}
+.cfg-f .ctl{margin-top:8px}
+.cfg-f.tog{display:flex;align-items:center;gap:12px}
+.cfg-f.tog .tx{flex:1;min-width:0}
+.cfg-f.tog .ctl{margin:0}
+.cfg-f.chg{border-left:3px solid var(--primary);padding-left:10px}
+.cfg-f .ctl .small{display:block;margin-top:4px}
+.cfgbar{position:sticky;bottom:0;z-index:10;display:flex;gap:8px;margin-top:14px;padding:10px 0 calc(10px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--outline)}
+.cfgbar .btn{flex:1}
+.blk,.kv span{overflow-wrap:anywhere}
+@media (min-width:760px){
+  .cfg-f:not(.tog){display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,340px);gap:4px 24px;align-items:center}
+  .cfg-f:not(.tog) .ctl{margin:0}
+  .cfgbar .btn{flex:none}
+}
+/* pantallas táctiles: objetivos de al menos 44 px (40 px en la barra superior para que quepa en 360 px) */
+@media (pointer:coarse){
+  .btn,.chip{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  .ib{min-height:44px;min-width:44px;justify-content:center}
+  .topbar .ib{min-height:40px;min-width:40px;padding:4px}
+  .topbar{gap:4px}
+  .gnav{gap:0}
+  .gnav .ib{padding:4px}
+}
+@media (max-width:640px){
+  #bMas{display:inline-flex}
+  #bMas[hidden]{display:none}
+  .acc{display:none;position:absolute;right:8px;top:100%;flex-direction:column;align-items:stretch;gap:2px;padding:6px;min-width:170px;background:var(--surface-variant);border:1px solid var(--outline);border-radius:12px;z-index:30;box-shadow:0 8px 24px #0006}
+  .acc.open{display:flex}
+  .acc .ib::after{content:attr(title);margin-left:8px;color:var(--fg)}
+  .acc .ib,.acc .btn{justify-content:flex-start}
+}
