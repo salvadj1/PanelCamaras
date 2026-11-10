@@ -55,6 +55,39 @@
     } catch (x) { $('iSis').textContent = x.message; }
   }
 
-  lista().then(c => { cam = c; if (cam) pintarCamara(); }).catch(() => {});
+  // ---- Conexión: cambiar IP/puertos/credenciales sin volver a añadir la cámara
+  const num = (el, def) => parseInt($(el).value) || def;
+  function rellenarForm(){
+    $('fHost').value = cam.host; $('fPuerto').value = cam.puerto; $('fCanal').value = cam.canal; $('fUser').value = cam.usuario;
+    $('fRtsp').value = cam.puertoRtsp; $('fHttp').value = cam.puertoHttp; $('fPass').value = '';
+  }
+  $('bBuscarIp').onclick = async () => {
+    const b = $('bBuscarIp'); b.disabled = true; b.textContent = 'Buscando…'; $('fMsg').textContent = '';
+    try {
+      const hall = await api('/api/camaras/buscar', 'POST');
+      $('fHallados').innerHTML = hall.map((f, i) => `<button class="btn out" style="width:100%;margin-top:4px" data-i="${i}" type="button">${esc(f.nombre)} · ${esc(f.ip)}</button>`).join('');
+      $('fHallados').querySelectorAll('button').forEach(x => x.onclick = () => { const f = hall[+x.dataset.i]; $('fHost').value = f.ip; $('fPuerto').value = f.puertoTcp || cam.puerto; });
+      if (!hall.length) $('fMsg').textContent = 'No se encontró ninguna cámara. Escribe la IP a mano.';
+    } catch (x) { $('fMsg').textContent = x.message; }
+    b.disabled = false; b.textContent = 'Buscar en la red';
+  };
+  $('bGuardarCon').onclick = async () => {
+    if (!$('fHost').value.trim()){ toast('Falta la IP'); return; }
+    $('fMsg').textContent = 'Probando conexión…';
+    try {
+      await patch({ host: $('fHost').value.trim(), puerto: num('fPuerto', 34567), canal: num('fCanal', 0), usuario: $('fUser').value.trim(),
+        password: $('fPass').value, puertoRtsp: num('fRtsp', 554), puertoHttp: num('fHttp', 80), probar: true });
+      $('fMsg').textContent = ''; toast('Conexión actualizada. Reabre el directo.');
+      cam = await lista(); pintarCamara(); rellenarForm(); infoCargada = false;
+    } catch (x) { $('fMsg').textContent = x.message; }
+  };
+
+  // ---- Eliminar la cámara
+  $('bEliminar').onclick = async () => {
+    if (!await confirmar('¿Eliminar la cámara?', `Se quita «${cam ? cam.nombre : ''}» de Panel Camaras. Las grabaciones de su tarjeta SD no se borran.`, 'Eliminar')) return;
+    try { await api('/api/camaras/' + id, 'DELETE'); location.href = '/'; } catch (x) { toast(x.message); }
+  };
+
+  lista().then(c => { cam = c; if (cam){ pintarCamara(); rellenarForm(); } }).catch(() => {});
   const q = new URLSearchParams(location.search).get('panel'); if (P[q]) ir(q);
 })();

@@ -28,8 +28,30 @@
       <div id="bloques"></div>
       <div class="card" style="margin:10px 0"><div class="mut small">Otro bloque (avanzado)</div>
         <div class="row"><input class="inp" id="bloqueOtro" placeholder="p. ej. Detect.BlindDetect" style="flex:1"><button class="btn tonal" id="bloqueIr" type="button">Abrir</button></div></div>
+      <h2 class="sec">Conexión</h2>
+      <details class="card" id="cForm" style="margin:10px 0">
+        <summary>Cambiar IP, puertos o contraseña</summary>
+        <p class="mut small">Si has cambiado la IP de la cámara, escribe la nueva aquí. Se conservan sus reglas y su historial.</p>
+        <div class="row"><button class="btn tonal" id="bBuscarIp" type="button">Buscar en la red</button></div>
+        <div id="fHallados"></div>
+        <label class="field"><span>IP o dirección</span><input id="fHost" inputmode="url" autocomplete="off"></label>
+        <div class="row" style="align-items:flex-start">
+          <label class="field" style="flex:1;min-width:110px"><span>Puerto</span><input id="fPuerto" inputmode="numeric"></label>
+          <label class="field" style="flex:1;min-width:110px"><span>Canal</span><input id="fCanal" inputmode="numeric"></label>
+        </div>
+        <label class="field"><span>Usuario</span><input id="fUser" autocomplete="off"></label>
+        <label class="field"><span>Contraseña (vacío = no cambiar)</span><input id="fPass" type="password" autocomplete="new-password"></label>
+        <div class="row" style="align-items:flex-start">
+          <label class="field" style="flex:1;min-width:110px"><span>Puerto RTSP</span><input id="fRtsp" inputmode="numeric"></label>
+          <label class="field" style="flex:1;min-width:110px"><span>Puerto HTTP</span><input id="fHttp" inputmode="numeric"></label>
+        </div>
+        <div class="row"><button class="btn" id="bGuardarCon" type="button">Probar y guardar</button></div>
+        <p class="small" id="fMsg" style="margin:6px 0 0"></p>
+      </details>
       <h2 class="sec">Acciones</h2>
       <div class="row"><button class="btn tonal" id="bHora" type="button">Sincronizar hora</button><button class="btn tonal" id="bReinicio" type="button">Reiniciar cámara</button></div>
+      <h2 class="sec">Zona delicada</h2>
+      <div class="row" style="margin-bottom:14px"><button class="btn out dz" id="bEliminar" type="button">Eliminar cámara</button></div>
     </div>
     <div id="pInfo" class="campanel" hidden>
       <div class="card" style="margin:10px 0"><div class="row" style="justify-content:space-between"><b id="iNombre"></b><button class="btn tonal" id="bNombre" type="button">Cambiar nombre</button></div></div>

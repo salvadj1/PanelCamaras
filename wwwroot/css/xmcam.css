@@ -217,3 +217,9 @@ input,select,textarea,.inp{font-size:16px}  /* 16 px evita el zoom automático d
   .acc .ib::after{content:attr(title);margin-left:8px;color:var(--fg)}
   .acc .ib,.acc .btn{justify-content:flex-start}
 }
+
+/* selector de cámara fijo bajo la barra (pantalla de configuración) */
+.camsel{position:sticky;top:49px;z-index:6;background:var(--bg);padding:6px 0;margin-bottom:4px}
+.camsel .chip{text-decoration:none}
+.ajnav{top:49px}
+.dz{color:var(--error);border-color:var(--error)}
