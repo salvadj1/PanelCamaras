@@ -76,7 +76,12 @@ namespace CentroSeguridad
                     ctx.Response.Redirect("/acceso?ret=" + System.Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString.Value));
             });
             app.UsarProxyLive();  // /live/ws -> go2rtc (vídeo en directo)
-            app.UseStaticFiles(); // sirve wwwroot (css, js)
+            // Sirve wwwroot (css, js). "no-cache" obliga al navegador a preguntar al servidor si el archivo cambió
+            // (responde 304 si no cambió), así tras actualizar la aplicación nadie sigue usando JS/CSS antiguos de su caché.
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = ctx => ctx.Context.Response.Headers["Cache-Control"] = "no-cache"
+            });
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
