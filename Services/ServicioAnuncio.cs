@@ -20,7 +20,9 @@ namespace CentroSeguridad.Services
     /// </summary>
     public class ServicioAnuncio : BackgroundService
     {
-        /// <summary>Puerto HTTPS de la aplicación (el que debe abrir quien encuentre el panel).</summary>
+        /// <summary>Puerto HTTP de la aplicación: es el que se anuncia (el Explorador de Windows lo abre mejor que HTTPS con certificado propio).</summary>
+        public const int PuertoHttp = 7000;
+        /// <summary>Puerto HTTPS de la aplicación.</summary>
         public const int PuertoHttps = 7001;
         /// <summary>Identificador único estable del dispositivo (mismo valor tras cada reinicio de este equipo).</summary>
         public static readonly Guid Uuid = CrearUuid();
@@ -115,7 +117,7 @@ namespace CentroSeguridad.Services
         private static byte[] Mensaje(string primera, IPAddress ip, string tipo, string campo)
         {
             string usn = "uuid:" + Uuid + "::upnp:rootdevice";
-            string s = primera + "\r\nCACHE-CONTROL: max-age=1800\r\nLOCATION: http://" + ip + ":7000/upnp.xml\r\nSERVER: PanelCamaras UPnP/1.0\r\n"
+            string s = primera + "\r\nCACHE-CONTROL: max-age=1800\r\nLOCATION: http://" + ip + ":" + PuertoHttp + "/upnp.xml\r\nSERVER: PanelCamaras UPnP/1.0\r\n"
                      + (primera.StartsWith("NOTIFY") ? "HOST: 239.255.255.250:1900\r\n" : "EXT:\r\n") + tipo + "USN: " + usn + "\r\n\r\n";
             return Encoding.ASCII.GetBytes(s);
         }
