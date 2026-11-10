@@ -14,7 +14,8 @@
     Object.keys(P).forEach(k => P[k].hidden = k !== p);
     $('tabs').querySelectorAll('[data-p]').forEach(a => a.classList.toggle('sel', a.dataset.p === p));
     $('sheet').classList.toggle('sinptz', p !== 'directo');
-    document.querySelector('.cambody').classList.toggle('fuera', p !== 'directo');   // fuera del directo: iconos arriba y contenido a todo el ancho   // fuera del directo solo queda la fila de iconos
+    document.querySelector('.cambody').classList.toggle('fuera', p !== 'directo');
+    $('camfuera').hidden = p !== 'ajustes'; $('tabs').hidden = p === 'ajustes';   // en Ajustes: cámaras en vez de los 4 iconos   // fuera del directo: iconos arriba y contenido a todo el ancho   // fuera del directo solo queda la fila de iconos
     if (p === 'info' && !infoCargada) cargarInfo();
   }
   $('tabs').querySelectorAll('[data-p]').forEach(a => a.onclick = e => { e.preventDefault(); ir(a.dataset.p); });
@@ -55,6 +56,14 @@
       $('iSis').innerHTML = filas.map(([k, v]) => `<div class="setrow" style="padding:4px 0"><div class="mut">${esc(k)}</div><div>${esc(v)}</div></div>`).join('') || 'Sin datos';
     } catch (x) { $('iSis').textContent = x.message; }
   }
+
+  // ---- Ajustes: fila de cámaras (misma sección de otra cámara) y botón para volver al directo
+  api('/api/camaras').then(r => {
+    $('camfuera').innerHTML = '<button class="chip" id="cfVolver" type="button" title="Volver al directo">‹ Directo</button>'
+      + r.camaras.map(c => `<a class="chip${c.id === id ? ' sel' : ''}" href="/camara/${esc(c.id)}?panel=ajustes">${esc(c.nombre)}</a>`).join('');
+    $('cfVolver').onclick = () => ir('directo');
+    const sel = $('camfuera').querySelector('.sel'); if (sel && sel.scrollIntoView) sel.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }).catch(() => {});
 
   // ---- Conexión: cambiar IP/puertos/credenciales sin volver a añadir la cámara
   const num = (el, def) => parseInt($(el).value) || def;

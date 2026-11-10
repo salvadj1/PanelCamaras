@@ -233,3 +233,7 @@ input,select,textarea,.inp{font-size:16px}  /* 16 px evita el zoom automático d
 .dzoom button{min-width:44px;height:44px;border-radius:22px;border:0;background:#000a;color:#fff;font-size:14px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
 .dzoom button[hidden]{display:none}
 .camstage .player video,.camstage .player img{transition:none;will-change:transform}
+
+/* Ajustes de cámara: la fila de cámaras vive dentro del panel superior (no fija) */
+.sheet .camsel{position:static;padding:0;margin:0;background:none}
+.camtabs[hidden],.camsel[hidden]{display:none}

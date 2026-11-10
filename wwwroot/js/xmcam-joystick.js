@@ -78,7 +78,7 @@ class XmJoystick {
   }
   _draw(){
     const g = this.g, S = this.c.width, c = S / 2, r = S / 2, d = this.d || 1, T = XmJoystick.TRAVEL;
-    if (!S) return;
+    if (!S || S < 8) return;   // canvas oculto (panel fuera del directo): no dibujar con radios negativos
     const acc = this._css('--primary') || '#3b82f6', baseHi = this._css('--surface-variant') || '#171b22', baseLo = this._css('--bg') || '#0e1116';
     const line = this._css('--outline') || '#2a3140', knobHi = this._css('--primary-container') || '#1d3a6b';
     const kr = r * 0.27, limit = r * T, kx = c + this.knob.x * limit, ky = c + this.knob.y * limit;
