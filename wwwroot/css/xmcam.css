@@ -223,3 +223,13 @@ input,select,textarea,.inp{font-size:16px}  /* 16 px evita el zoom automático d
 .camsel .chip{text-decoration:none}
 .ajnav{top:49px}
 .dz{color:var(--error);border-color:var(--error)}
+
+/* fuera del directo (Ajustes / Info): la fila de iconos pasa arriba y el contenido ocupa todo el ancho */
+.cambody.fuera{flex-direction:column;gap:0}
+.cambody.fuera .sheet{order:-1;width:auto;align-self:stretch;margin:0 0 6px;padding:6px 8px;box-shadow:none}
+.cambody.fuera .camtabs{margin:0;max-width:420px}
+/* zoom digital del directo */
+.dzoom{position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.dzoom button{min-width:44px;height:44px;border-radius:22px;border:0;background:#000a;color:#fff;font-size:14px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center}
+.dzoom button[hidden]{display:none}
+.camstage .player video,.camstage .player img{transition:none;will-change:transform}
