@@ -1,0 +1,3 @@
+Archivos estaticos sin cache antigua
+
+Startup.cs: los archivos de wwwroot (css, js) se sirven con Cache-Control: no-cache; el navegador comprueba si cambiaron y ya no usa versiones antiguas tras actualizar.

@@ -1,0 +1,6 @@
+Configuracion de camaras legible y web mas compatible con movil
+
+wwwroot/css/xmcam.css: campos a 16 px y 44 px (sin zoom en iPhone); botones/chips/iconos tactiles de 44 px (40 px en la barra superior); tarjetas de configuracion con titulo en negrita y ayuda con mas contraste; barra fija Guardar/Recargar; ajuste de notch y barra de gestos; texto largo que se parte; menu "..." en movil.
+wwwroot/js/xmcam-config.js: cada seccion en su tarjeta; en Avanzado nombre legible y clave tecnica pequena; marca lateral en los ajustes cambiados sin guardar.
+Views/Camaras/Config.cshtml: barra fija de Guardar y Recargar.
+Views/Shared/_Camaras.cshtml: los botones propios de cada pagina pasan a un menu "..." en movil.

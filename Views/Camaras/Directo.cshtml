@@ -18,6 +18,11 @@
           <span class="badge live">EN VIVO</span><span class="badge q" id="bQ">SD</span>
         </div>
         <p id="estado" class="small estado"></p>
+        <div class="dzoom" role="group" aria-label="Zoom digital">
+          <button id="dzMas" type="button" title="Acercar (zoom digital)" aria-label="Acercar (zoom digital)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button id="dzMenos" type="button" title="Alejar" aria-label="Alejar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <button id="dzReset" type="button" title="Quitar el zoom" aria-label="Quitar el zoom" hidden></button>
+        </div>
       </div>
     </div>
 <div id="pAjustes" class="campanel" hidden>
@@ -28,8 +33,30 @@
       <div id="bloques"></div>
       <div class="card" style="margin:10px 0"><div class="mut small">Otro bloque (avanzado)</div>
         <div class="row"><input class="inp" id="bloqueOtro" placeholder="p. ej. Detect.BlindDetect" style="flex:1"><button class="btn tonal" id="bloqueIr" type="button">Abrir</button></div></div>
+      <h2 class="sec">Conexión</h2>
+      <details class="card" id="cForm" style="margin:10px 0">
+        <summary>Cambiar IP, puertos o contraseña</summary>
+        <p class="mut small">Si has cambiado la IP de la cámara, escribe la nueva aquí. Se conservan sus reglas y su historial.</p>
+        <div class="row"><button class="btn tonal" id="bBuscarIp" type="button">Buscar en la red</button></div>
+        <div id="fHallados"></div>
+        <label class="field"><span>IP o dirección</span><input id="fHost" inputmode="url" autocomplete="off"></label>
+        <div class="row" style="align-items:flex-start">
+          <label class="field" style="flex:1;min-width:110px"><span>Puerto</span><input id="fPuerto" inputmode="numeric"></label>
+          <label class="field" style="flex:1;min-width:110px"><span>Canal</span><input id="fCanal" inputmode="numeric"></label>
+        </div>
+        <label class="field"><span>Usuario</span><input id="fUser" autocomplete="off"></label>
+        <label class="field"><span>Contraseña (vacío = no cambiar)</span><input id="fPass" type="password" autocomplete="new-password"></label>
+        <div class="row" style="align-items:flex-start">
+          <label class="field" style="flex:1;min-width:110px"><span>Puerto RTSP</span><input id="fRtsp" inputmode="numeric"></label>
+          <label class="field" style="flex:1;min-width:110px"><span>Puerto HTTP</span><input id="fHttp" inputmode="numeric"></label>
+        </div>
+        <div class="row"><button class="btn" id="bGuardarCon" type="button">Probar y guardar</button></div>
+        <p class="small" id="fMsg" style="margin:6px 0 0"></p>
+      </details>
       <h2 class="sec">Acciones</h2>
       <div class="row"><button class="btn tonal" id="bHora" type="button">Sincronizar hora</button><button class="btn tonal" id="bReinicio" type="button">Reiniciar cámara</button></div>
+      <h2 class="sec">Zona delicada</h2>
+      <div class="row" style="margin-bottom:14px"><button class="btn out dz" id="bEliminar" type="button">Eliminar cámara</button></div>
     </div>
     <div id="pInfo" class="campanel" hidden>
       <div class="card" style="margin:10px 0"><div class="row" style="justify-content:space-between"><b id="iNombre"></b><button class="btn tonal" id="bNombre" type="button">Cambiar nombre</button></div></div>
@@ -38,6 +65,7 @@
     </div>
   </div>
   <section class="sheet" id="sheet" aria-label="Controles de la cámara">
+    <div id="camfuera" class="chips camsel" aria-label="Cambiar de cámara" hidden></div>
     <div class="tabs camtabs" id="tabs">
       <a href="#" class="sel" data-p="directo" title="Directo" aria-label="Directo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg></a>
       <a href="/camara/@ViewData["CamId"]/sd" title="Grabaciones de la SD" aria-label="Grabaciones de la SD"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/></svg></a>
@@ -51,6 +79,11 @@
         <span class="sp"></span>
         <button class="btn tonal" id="bAudio" type="button">Sin audio</button>
         <button class="btn tonal" id="bFoto" type="button">Foto</button>
+      </div>
+      <div class="row" style="margin:2px 0" title="Z+ y Z− mueven el zoom de la cámara (óptico) o acercan la imagen en el navegador (digital)">
+        <span class="small mut">Botones Z+ / Z−</span><span class="sp"></span>
+        <button class="chip" id="zOpt" type="button">Óptico</button>
+        <button class="chip" id="zDig" type="button">Digital</button>
       </div>
       <div class="ptzbox">
         <canvas id="joy" aria-label="Joystick PTZ"></canvas>
@@ -71,6 +104,7 @@
   <script src="~/js/xmcam-live.js"></script>
   <script src="~/js/xmcam-joystick.js"></script>
   <script src="~/js/xmcam-schemas.js"></script>
+  <script src="~/js/xmcam-dzoom.js"></script>
   <script src="~/js/xmcam-directo.js"></script>
   <script src="~/js/xmcam-camajustes.js"></script>
 }

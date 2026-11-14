@@ -1,0 +1,6 @@
+Ajustes de camara con fila de camaras en vez de los 4 iconos
+
+Views/Camaras/Directo.cshtml: fila de camaras para la pantalla de Ajustes.
+wwwroot/js/xmcam-camajustes.js: en Ajustes se ocultan los 4 iconos y se muestran las camaras (abre los Ajustes de la camara elegida) y un boton "Directo" para volver; Info y Directo conservan los iconos.
+wwwroot/js/xmcam-joystick.js: no dibuja con el canvas oculto (error de radio negativo que podia dejar sin arrancar el resto del directo al entrar por ?panel=ajustes).
+wwwroot/css/xmcam.css: estilos de la fila de camaras dentro del panel.

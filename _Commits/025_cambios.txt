@@ -1,0 +1,8 @@
+Configuracion de camara con valores reales, cambio de IP, eliminar camara y selector de camaras
+
+Controllers/CamarasApiController.cs: la lectura de un bloque reintenta con ".[0]" (canal 0) si el nombre sin indice no devuelve datos y devuelve el nombre real en la cabecera X-Config-Name; el nombre de bloque admite "[0]"; PATCH acepta IP, puertos, usuario, contrasena y canal (con prueba de login opcional).
+wwwroot/js/xmcam-config.js: si la camara devuelve el bloque como lista por canal se muestran sus ajustes reales; en Avanzado los "...Enable" en hexadecimal son interruptores; guarda con el nombre real del bloque; boton "Ver JSON"; fila fija de camaras para cambiar de camara sin salir de la pantalla.
+Views/Camaras/Config.cshtml: selector de camaras, boton Ver JSON y zona del JSON.
+Views/Camaras/Directo.cshtml: tarjeta "Conexion" (cambiar IP, puertos, credenciales, buscar en la red) y boton "Eliminar camara".
+wwwroot/js/xmcam-camajustes.js: logica de conexion y eliminacion.
+wwwroot/css/xmcam.css: estilos del selector de camaras y del boton de eliminar.

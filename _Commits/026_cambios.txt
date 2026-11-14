@@ -1,0 +1,7 @@
+Zoom digital en el directo y panel de iconos arriba en Ajustes/Info
+
+wwwroot/js/xmcam-dzoom.js (nuevo): zoom digital reutilizable (rueda, pellizco, arrastre, doble toque 1x-2,5x, zoom continuo).
+wwwroot/js/xmcam-directo.js: botones de zoom + / - sobre el video; los botones Z+ / Z- del panel pueden ser Optico (camara) o Digital (navegador), recordado por camara; aviso si el zoom optico no hace nada.
+Views/Camaras/Directo.cshtml: botones de zoom digital sobre el video, selector Optico/Digital y carga del nuevo script.
+wwwroot/js/xmcam-camajustes.js: fuera del directo se marca la pantalla con la clase "fuera".
+wwwroot/css/xmcam.css: en Ajustes/Info los 4 iconos pasan a una fila superior y el contenido ocupa todo el ancho; estilos del zoom digital.

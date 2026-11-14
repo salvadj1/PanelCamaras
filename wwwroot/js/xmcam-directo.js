@@ -1,6 +1,6 @@
 /**
  * Pantalla de directo de una cámara (equivale a LiveScreen.kt): carrusel de cámaras, vídeo (HD/SD, audio),
- * foto, joystick PTZ, zoom/enfoque con botones de mantener y 6 posiciones guardadas.
+ * foto, joystick PTZ, zoom (óptico de la cámara o digital en el navegador), enfoque y 6 posiciones guardadas.
  */
 (function(){
   const { $, esc, api, store, toast } = XM;
@@ -57,6 +57,21 @@
     } catch (_) { setEstado('No se pudo capturar'); }
   };
 
+  // ---------------------------------------------------------------- zoom digital
+  const dz = XmDZoom.crear($('player'), [$('vid'), $('snap')], z => {
+    $('dzReset').hidden = z === 1; $('dzReset').textContent = '×' + (Math.round(z * 10) / 10);
+  });
+  $('dzMas').onclick = () => dz.acercar();
+  $('dzMenos').onclick = () => dz.alejar();
+  $('dzReset').onclick = () => dz.reset();
+  // Los botones Z+/Z− del panel pueden mover el zoom óptico de la cámara o el digital (se recuerda por cámara).
+  let zModo = store.get('zoomModo_' + id, 'opt') === 'dig' ? 'dig' : 'opt', avisoOpt = false;
+  const pintaModo = () => { $('zOpt').classList.toggle('sel', zModo === 'opt'); $('zDig').classList.toggle('sel', zModo === 'dig'); };
+  $('zOpt').onclick = () => { zModo = 'opt'; store.set('zoomModo_' + id, 'opt'); pintaModo(); };
+  $('zDig').onclick = () => { zModo = 'dig'; store.set('zoomModo_' + id, 'dig'); pintaModo(); };
+  pintaModo();
+  const esZoom = b => b.dataset.cmd === 'ZoomTile' || b.dataset.cmd === 'ZoomWide';
+
   // ---------------------------------------------------------------- PTZ
   /**
    * Envía el movimiento al servidor. Mientras se mantiene una orden se repite cada 500 ms (latido): si se perdiera
@@ -84,8 +99,16 @@
 
   const joy = new XmJoystick($('joy'), (cmd, step) => Ptz.set(cmd, step));
   document.querySelectorAll('.hold').forEach(b => {
-    b.addEventListener('pointerdown', e => { b.setPointerCapture(e.pointerId); Ptz.set(b.dataset.cmd, 5); e.preventDefault(); });
-    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => b.addEventListener(t, () => { if (Ptz.cmd === b.dataset.cmd) Ptz.set(null, 0); }));
+    b.addEventListener('pointerdown', e => {
+      b.setPointerCapture(e.pointerId); e.preventDefault();
+      if (esZoom(b) && zModo === 'dig'){ dz.mantener(b.dataset.cmd === 'ZoomTile' ? 1 : -1); return; }   // zoom digital
+      if (esZoom(b) && !avisoOpt){ avisoOpt = true; setEstado('Si la imagen no se acerca, tu cámara no tiene zoom óptico: elige «Digital».'); }
+      Ptz.set(b.dataset.cmd, 5);
+    });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => b.addEventListener(t, () => {
+      if (esZoom(b)) dz.soltar();
+      if (Ptz.cmd === b.dataset.cmd) Ptz.set(null, 0);
+    }));
     b.addEventListener('contextmenu', e => e.preventDefault());
   });
 

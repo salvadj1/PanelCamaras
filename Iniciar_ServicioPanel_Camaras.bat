@@ -3,18 +3,25 @@ rem ============================================================
 rem  IniciarServicio.bat
 rem  Registra (si no existe) el servicio "PanelCamaras", lo deja
 rem  en inicio AUTOMATICO con Windows y lo inicia ahora.
-rem  Debe estar junto a PanelCamaras.exe. Requiere administrador.
+rem  Debe estar junto a PanelCamaras.exe. Se relanza solo como administrador.
 rem ============================================================
 setlocal
 set "SVC=PanelCamaras"
 set "EXE=%~dp0PanelCamaras.exe"
 
+rem --- Se relanza solo como ADMINISTRADOR (Windows mostrara el aviso de permisos, UAC) ---
 net session >nul 2>&1
 if errorlevel 1 (
-    echo Ejecuta este archivo como ADMINISTRADOR.
-    pause
-    exit /b 1
+    echo Solicitando permisos de administrador...
+    powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs" >nul 2>&1
+    if errorlevel 1 (
+        echo No se concedieron los permisos de administrador. No se ha hecho ningun cambio.
+        pause
+    )
+    exit /b
 )
+rem Como administrador la carpeta de trabajo cambia: se vuelve a la del archivo (pushd tambien admite rutas de red UNC)
+pushd "%~dp0"
 
 if not exist "%EXE%" (
     echo No se encuentra "%EXE%".

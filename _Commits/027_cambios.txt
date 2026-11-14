@@ -1,0 +1,4 @@
+IniciarServicio.bat y DetenerServicio.bat se relanzan solos como administrador
+
+IniciarServicio.bat: si no es administrador, se relanza con PowerShell (Start-Process -Verb RunAs); Windows pide el permiso y el resto del archivo no cambia.
+DetenerServicio.bat: igual.

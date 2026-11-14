@@ -1,0 +1,4 @@
+Anuncio de red con enlace HTTP
+
+Controllers/AnuncioController.cs: la presentationURL del anuncio pasa a http://host:7000/ (antes https://host:7001/).
+Services/ServicioAnuncio.cs: constante PuertoHttp usada en el anuncio.

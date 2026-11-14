@@ -48,6 +48,16 @@ namespace CentroSeguridad.Controllers
         public string Nombre { get; set; }
         public bool? Vigilar { get; set; }
         public bool? RtspHash { get; set; }
+        // Conexión (cambio de IP, puertos o credenciales). Password vacío o null = se conserva la actual.
+        public string Host { get; set; }
+        public int? Puerto { get; set; }
+        public string Usuario { get; set; }
+        public string Password { get; set; }
+        public int? PuertoRtsp { get; set; }
+        public int? PuertoHttp { get; set; }
+        public int? Canal { get; set; }
+        /// <summary>true = comprobar el login con los datos nuevos antes de guardar.</summary>
+        public bool Probar { get; set; }
     }
 
     /// <summary>API JSON de cámaras: lista/estado, alta/baja, búsqueda en red, diagnóstico, PTZ, presets y capturas.</summary>
@@ -61,7 +71,7 @@ namespace CentroSeguridad.Controllers
         private readonly PtzService _ptz;
         private readonly Go2RtcService _go2rtc;
         private readonly ControlCamaras _control;
-        private static readonly Regex NombreBloque = new Regex("^[A-Za-z0-9_.]{1,64}$", RegexOptions.Compiled);
+        private static readonly Regex NombreBloque = new Regex(@"^[A-Za-z0-9_.\[\]]{1,64}$", RegexOptions.Compiled);
 
         public CamarasApiController(AlmacenCamaras almacen, EstadoCamaras estado, PtzService ptz, Go2RtcService go2rtc, ControlCamaras control)
         {
@@ -127,18 +137,38 @@ namespace CentroSeguridad.Controllers
             return Ok(lineas);
         }
 
-        /// <summary>PATCH /api/camaras/{id}: cambia nombre, vigilancia o RTSP con hash.</summary>
+        /// <summary>
+        /// PATCH /api/camaras/{id}: cambia nombre, vigilancia, RTSP con hash y/o los datos de conexión (IP, puertos,
+        /// usuario, contraseña, canal). Con <c>Probar</c> se comprueba el login con los datos nuevos antes de guardar.
+        /// </summary>
         [HttpPatch("{id}")]
-        public IActionResult Editar(string id, [FromBody] EditarCamaraDto d)
+        public async Task<IActionResult> Editar(string id, [FromBody] EditarCamaraDto d)
         {
+            var actual = _almacen.Obtener(id);
+            if (actual == null) return NotFound();
             if (d.Nombre != null && string.IsNullOrWhiteSpace(d.Nombre)) return BadRequest(new { error = "El nombre no puede estar vacío" });
-            bool ok = _almacen.Actualizar(id, c =>
+            if (d.Host != null && string.IsNullOrWhiteSpace(d.Host)) return BadRequest(new { error = "Falta la IP" });
+            if ((d.Puerto ?? 1) < 1 || (d.PuertoRtsp ?? 1) < 1 || (d.PuertoHttp ?? 1) < 1 || (d.Canal ?? 0) < 0) return BadRequest(new { error = "Puerto o canal no válido" });
+            string host = d.Host?.Trim() ?? actual.Host;
+            int puerto = d.Puerto ?? actual.Puerto;
+            string usuario = string.IsNullOrWhiteSpace(d.Usuario) ? actual.Usuario : d.Usuario.Trim();
+            string clave = string.IsNullOrEmpty(d.Password) ? actual.Password : d.Password;
+            if (d.Probar)
+            {
+                try { await Task.Run(() => { using (var c = new DvripClient(host, puerto)) c.Login(usuario, clave); }); }
+                catch (Exception e) { return BadRequest(new { error = "No se pudo conectar con los datos nuevos: " + e.Message }); }
+            }
+            _almacen.Actualizar(id, c =>
             {
                 if (d.Nombre != null) c.Nombre = d.Nombre.Trim();
                 if (d.Vigilar.HasValue) c.Vigilar = d.Vigilar.Value;
                 if (d.RtspHash.HasValue) c.RtspHash = d.RtspHash.Value;
+                c.Host = host; c.Puerto = puerto; c.Usuario = usuario; c.Password = clave;
+                if (d.PuertoRtsp.HasValue) c.PuertoRtsp = d.PuertoRtsp.Value;
+                if (d.PuertoHttp.HasValue) c.PuertoHttp = d.PuertoHttp.Value;
+                if (d.Canal.HasValue) c.Canal = d.Canal.Value;
             });
-            return ok ? Ok() : NotFound();
+            return Ok();
         }
 
         /// <summary>GET /api/camaras/{id}/info: información de sistema y hora de la cámara.</summary>
@@ -159,6 +189,23 @@ namespace CentroSeguridad.Controllers
             catch (Exception e) { return BadRequest(new { error = e.Message }); }
         }
 
+        /// <summary>
+        /// Lee un bloque de configuración. Muchas cámaras XM guardan algunos bloques por canal: si el nombre sin índice no
+        /// devuelve datos, se reintenta con ".[0]" (canal 0). Devuelve el nombre que funcionó y el JSON en bruto.
+        /// </summary>
+        private static (string, string) LeerConIndice(DvripClient c, string name)
+        {
+            string raw = null; Exception fallo = null;
+            try { raw = c.GetConfigRaw(name); } catch (Exception e) { fallo = e; }
+            if ((raw == null || raw == "null") && !name.EndsWith("]"))
+            {
+                string conIdx = name + ".[0]";
+                try { string r2 = c.GetConfigRaw(conIdx); if (r2 != null && r2 != "null") return (conIdx, r2); } catch (Exception) { }
+            }
+            if (fallo != null) throw fallo;
+            return (name, raw);
+        }
+
         /// <summary>GET /api/camaras/{id}/config?name=X: bloque de configuración de la cámara (JSON tal cual).</summary>
         [HttpGet("{id}/config")]
         public async Task<IActionResult> LeerConfig(string id, [FromQuery] string name)
@@ -167,8 +214,9 @@ namespace CentroSeguridad.Controllers
             if (_almacen.Obtener(id) == null) return NotFound();
             try
             {
-                string raw = await _control.EjecutarAsync(id, c => c.GetConfigRaw(name));
-                return Content(raw ?? "null", "application/json");
+                var r = await _control.EjecutarAsync(id, c => LeerConIndice(c, name));
+                Response.Headers["X-Config-Name"] = r.Item1;   // nombre con el que respondió la cámara (el cliente lo usa para guardar)
+                return Content(r.Item2 ?? "null", "application/json");
             }
             catch (Exception e) { return BadRequest(new { error = e.Message }); }
         }
