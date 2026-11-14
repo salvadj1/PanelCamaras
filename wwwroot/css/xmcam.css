@@ -237,3 +237,54 @@ input,select,textarea,.inp{font-size:16px}  /* 16 px evita el zoom automático d
 /* Ajustes de cámara: la fila de cámaras vive dentro del panel superior (no fija) */
 .sheet .camsel{position:static;padding:0;margin:0;background:none}
 .camtabs[hidden],.camsel[hidden]{display:none}
+
+/* ===== 032: cámaras en la barra superior ===== */
+.topbar .topcams{flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 4px}
+.topbar .topcams::-webkit-scrollbar{display:none}
+.topbar .topcams .chip{text-decoration:none;padding:3px 10px;min-height:30px;font-size:13px;display:inline-flex;align-items:center;flex:none}
+@media (pointer:coarse){.topbar .topcams .chip{min-height:36px}}
+#camfuera{position:static;padding:0;margin:0 0 4px}
+
+/* Resumen compacto en cuadrícula */
+.resg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 14px}
+.resg .rc{min-width:0;padding:2px 0}
+.resg .l{font-size:11px;letter-spacing:.03em;text-transform:uppercase;color:var(--on-surface-variant)}
+.resg .v{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--outline)}
+.dot.ok{background:#3ecf6e}.dot.ko{background:var(--error,#e5484d)}
+@media (max-width:480px){.resg{grid-template-columns:1fr 1fr}}
+
+/* Tarjetas de ajustes desplegables (lista de bloques) */
+.blk-it{background:var(--surface-variant);border-radius:12px;margin:6px 0;overflow:hidden}
+.blk-it .blk{display:flex;align-items:center;gap:10px;width:100%;margin:0;border:0;background:none;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.blk-it .bt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.blk-it .chev{flex:none;transition:transform .15s;opacity:.7}
+.blk-it.open .chev{transform:rotate(180deg)}
+.blk-it.open{outline:1px solid var(--primary)}
+.blk-body{padding:0 12px 6px}
+.cp-inline .cfgbar{position:static;border-top:0;padding-bottom:8px;background:none}
+
+/* Secciones plegables dentro de un bloque */
+.cfg-sec{margin:10px 0}
+.cfg-sec>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--primary);padding:8px 2px}
+.cfg-sec>summary::-webkit-details-marker{display:none}
+.cfg-sec>summary::before{content:"▸";transition:transform .15s}
+.cfg-sec[open]>summary::before{transform:rotate(90deg)}
+.cfg-sec>summary small{margin-left:auto;font-weight:400;opacity:.6}
+.cfg-sec>.cfg-card{margin-top:0}
+.cfg-sub{margin:12px 2px 0;font-size:12px;font-weight:600;color:var(--on-surface-variant)}
+.cfg-sec .cfg-sub+.cfg-card{margin-top:4px}
+
+/* Avanzado: cuadrícula legible, interruptores dentro de la tarjeta */
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0 28px}
+.cfg-grid .cfg-f:not(.tog){display:block}
+.cfg-grid .cfg-f .ctl{margin-top:6px}
+.cfg-grid .cfg-f.tog .ctl{margin:0;flex:none}
+.cfg-grid .cfg-f{padding:10px 0}
+.cfg-f.tog .ctl,.cfg-f .switch{flex:none;max-width:100%}
+.cfg-f .h{margin-top:1px}
+.cp-json{white-space:pre-wrap;overflow-wrap:anywhere;user-select:all;background:var(--surface-variant);border-radius:10px;padding:10px;max-height:50vh;overflow:auto}
+.cfg-f .inp::placeholder{opacity:.5}
+.switch{display:inline-block;vertical-align:middle}   /* sin esto el interruptor medía 0 de ancho dentro de las fichas de ajustes */
+.switch i{box-shadow:inset 0 0 0 1px var(--fg);opacity:.9}
+.switch input:checked+i{box-shadow:none}

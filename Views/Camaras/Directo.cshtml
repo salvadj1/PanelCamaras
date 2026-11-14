@@ -67,7 +67,7 @@
     </div>
   </div>
   <section class="sheet" id="sheet" aria-label="Controles de la cámara">
-    <div id="camfuera" class="chips camsel" aria-label="Cambiar de cámara" hidden></div>
+    <div id="camfuera" class="chips camsel" hidden><button class="chip" id="cfVolver" type="button" title="Volver al directo">‹ Directo</button></div>
     <div class="tabs camtabs" id="tabs">
       <a href="#" class="sel" data-p="directo" title="Directo" aria-label="Directo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg></a>
       <a href="/camara/@ViewData["CamId"]/sd" title="Grabaciones de la SD" aria-label="Grabaciones de la SD"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/></svg></a>
@@ -107,6 +107,7 @@
   <script src="~/js/xmcam-joystick.js"></script>
   <script src="~/js/xmcam-schemas.js"></script>
   <script src="~/js/xmcam-dzoom.js"></script>
+  <script src="~/js/xmcam-cfgpanel.js"></script>
   <script src="~/js/xmcam-directo.js"></script>
   <script src="~/js/xmcam-camajustes.js"></script>
 }

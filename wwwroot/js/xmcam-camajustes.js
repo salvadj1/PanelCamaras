@@ -11,11 +11,12 @@
 
   /** Muestra un panel; el vídeo se detiene al salir del directo para no gastar red. */
   function ir(p){
+    document.body.dataset.panel = p;   // lo lee la barra de cámaras para conservar la sección al cambiar de cámara
     Object.keys(P).forEach(k => P[k].hidden = k !== p);
     $('tabs').querySelectorAll('[data-p]').forEach(a => a.classList.toggle('sel', a.dataset.p === p));
     $('sheet').classList.toggle('sinptz', p !== 'directo');
     document.querySelector('.cambody').classList.toggle('fuera', p !== 'directo');
-    $('camfuera').hidden = p !== 'ajustes'; $('tabs').hidden = p === 'ajustes';   // en Ajustes: cámaras en vez de los 4 iconos   // fuera del directo: iconos arriba y contenido a todo el ancho   // fuera del directo solo queda la fila de iconos
+    $('camfuera').hidden = p !== 'ajustes'; $('tabs').hidden = p === 'ajustes';   // en Ajustes: botón «Directo» en vez de los 4 iconos
     if ((p === 'info' || p === 'ajustes') && !infoCargada) cargarInfo();
   }
   $('tabs').querySelectorAll('[data-p]').forEach(a => a.onclick = e => { e.preventDefault(); ir(a.dataset.p); });
@@ -31,8 +32,20 @@
       .map(([k, v]) => `<div class="setrow" style="padding:4px 0"><div class="mut">${k}</div><div>${esc(v)}</div></div>`).join('');
   }
 
-  $('bloques').innerHTML = XmSchemas.BLOCKS.map(([t, d, n, f]) =>
-    `<a class="blk" href="/camara/${id}/config?name=${encodeURIComponent(n)}${f ? '&filter=' + encodeURIComponent(f) : ''}"><div>${esc(t)}</div><div class="mut">${esc(d)}</div></a>`).join('');
+  /** Lista de bloques de la cámara como tarjetas desplegables: al abrir una se monta el editor en el mismo sitio (solo una abierta). */
+  $('bloques').innerHTML = XmSchemas.BLOCKS.map(([t, d], i) =>
+    `<div class="blk-it" data-i="${i}"><button class="blk" type="button" aria-expanded="false"><span class="bt"><span>${esc(t)}</span><span class="mut">${esc(d)}</span></span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="blk-body" hidden></div></div>`).join('');
+  $('bloques').querySelectorAll('.blk-it').forEach(it => it.querySelector('.blk').onclick = () => {
+    const abrir = it.querySelector('.blk-body').hidden;
+    $('bloques').querySelectorAll('.blk-it').forEach(o => { o.classList.remove('open'); o.querySelector('.blk-body').hidden = true; o.querySelector('.blk').setAttribute('aria-expanded', 'false'); });
+    if (!abrir) return;
+    it.classList.add('open'); it.querySelector('.blk-body').hidden = false; it.querySelector('.blk').setAttribute('aria-expanded', 'true');
+    if (!it.dataset.listo){   // el editor se crea la primera vez que se abre
+      it.dataset.listo = '1'; const [, , n, f] = XmSchemas.BLOCKS[+it.dataset.i];
+      XmConfig.mount(it.querySelector('.blk-body'), { id, name: n, filter: f || null, titulo: false });
+    }
+    if (it.scrollIntoView) it.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  });
   $('bloqueIr').onclick = () => { const n = $('bloqueOtro').value.trim(); if (n) location.href = `/camara/${id}/config?name=${encodeURIComponent(n)}`; };
 
   $('cVigilar').onchange = async e => { try { await patch({ vigilar: e.target.checked }); } catch (x) { toast(x.message); e.target.checked = !e.target.checked; } };
@@ -55,10 +68,10 @@
     if (!cam) return;
     const s = (r && r.sistema) || {}, red = (r && r.red) || {};
     const filas = [['Estado', cam.online ? 'En línea' : 'Sin conexión'], ['Dirección', cam.host + ':' + cam.puerto], ['MAC', red.mac],
-      ['Máscara / puerta de enlace', red.mascara ? red.mascara + ' / ' + (red.puerta || '—') : ''], ['Modelo', s.HardWare || s.DeviceType], ['Firmware', s.SoftWareVersion],
+      ['Máscara / puerta', red.mascara ? red.mascara + ' / ' + (red.puerta || '—') : ''], ['Modelo', s.HardWare || s.DeviceType], ['Firmware', s.SoftWareVersion],
       ['Número de serie', s.SerialNo], ['Usuario / canal', cam.usuario + ' / ' + cam.canal]];
-    $('aResumen').innerHTML = filas.filter(f => f[1] !== undefined && f[1] !== '')
-      .map(([k, v]) => `<div class="setrow" style="padding:4px 0"><div class="mut">${esc(k)}</div><div style="text-align:right;overflow-wrap:anywhere">${esc(v)}</div></div>`).join('');
+    $('aResumen').innerHTML = '<div class="resg">' + filas.filter(f => f[1] !== undefined && f[1] !== '')
+      .map(([k, v]) => `<div class="rc"><div class="l">${esc(k)}</div><div class="v">${k === 'Estado' ? `<i class="dot ${cam.online ? 'ok' : 'ko'}"></i>` : ''}${esc(v)}</div></div>`).join('') + '</div>';
   }
 
   async function cargarInfo(){
@@ -71,13 +84,8 @@
     } catch (x) { $('iSis').textContent = x.message; pintarResumen(null); }
   }
 
-  // ---- Ajustes: fila de cámaras (misma sección de otra cámara) y botón para volver al directo
-  api('/api/camaras').then(r => {
-    $('camfuera').innerHTML = '<button class="chip" id="cfVolver" type="button" title="Volver al directo">‹ Directo</button>'
-      + r.camaras.map(c => `<a class="chip${c.id === id ? ' sel' : ''}" href="/camara/${esc(c.id)}?panel=ajustes">${esc(c.nombre)}</a>`).join('');
-    $('cfVolver').onclick = () => ir('directo');
-    const sel = $('camfuera').querySelector('.sel'); if (sel && sel.scrollIntoView) sel.scrollIntoView({ inline: 'center', block: 'nearest' });
-  }).catch(() => {});
+  // ---- Ajustes: botón para volver al directo (las cámaras están en la barra superior)
+  $('cfVolver').onclick = () => ir('directo');
 
   // ---- Conexión: cambiar IP/puertos/credenciales sin volver a añadir la cámara
   const num = (el, def) => parseInt($(el).value) || def;
