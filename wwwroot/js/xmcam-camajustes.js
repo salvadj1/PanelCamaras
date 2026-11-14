@@ -16,7 +16,7 @@
     $('sheet').classList.toggle('sinptz', p !== 'directo');
     document.querySelector('.cambody').classList.toggle('fuera', p !== 'directo');
     $('camfuera').hidden = p !== 'ajustes'; $('tabs').hidden = p === 'ajustes';   // en Ajustes: cámaras en vez de los 4 iconos   // fuera del directo: iconos arriba y contenido a todo el ancho   // fuera del directo solo queda la fila de iconos
-    if (p === 'info' && !infoCargada) cargarInfo();
+    if ((p === 'info' || p === 'ajustes') && !infoCargada) cargarInfo();
   }
   $('tabs').querySelectorAll('[data-p]').forEach(a => a.onclick = e => { e.preventDefault(); ir(a.dataset.p); });
 
@@ -25,7 +25,7 @@
 
   function pintarCamara(){
     $('cVigilar').checked = !!cam.vigilar; $('cHash').checked = !!cam.rtspHash;
-    $('iNombre').textContent = cam.nombre;
+    $('iNombre').textContent = cam.nombre; pintarResumen(null);
     $('iConex').innerHTML = [['Dirección', cam.host + ':' + cam.puerto], ['Usuario', cam.usuario], ['Canal', cam.canal],
       ['Puerto RTSP', cam.puertoRtsp], ['Puerto HTTP', cam.puertoHttp], ['Estado', cam.online ? 'En línea' : 'Sin conexión']]
       .map(([k, v]) => `<div class="setrow" style="padding:4px 0"><div class="mut">${k}</div><div>${esc(v)}</div></div>`).join('');
@@ -48,13 +48,27 @@
     try { await patch({ nombre: n.trim() }); cam.nombre = n.trim(); pintarCamara(); toast('Nombre cambiado'); } catch (x) { toast(x.message); }
   };
 
+  /** Tarjeta "Resumen" al principio de Ajustes: datos guardados (IP, usuario…) y, si la cámara responde, MAC, modelo y firmware. */
+  let ultimaInfo = null;   // última respuesta de /info, para repintar el resumen si la cámara se carga después
+  function pintarResumen(r){
+    if (r) ultimaInfo = r; else r = ultimaInfo;
+    if (!cam) return;
+    const s = (r && r.sistema) || {}, red = (r && r.red) || {};
+    const filas = [['Estado', cam.online ? 'En línea' : 'Sin conexión'], ['Dirección', cam.host + ':' + cam.puerto], ['MAC', red.mac],
+      ['Máscara / puerta de enlace', red.mascara ? red.mascara + ' / ' + (red.puerta || '—') : ''], ['Modelo', s.HardWare || s.DeviceType], ['Firmware', s.SoftWareVersion],
+      ['Número de serie', s.SerialNo], ['Usuario / canal', cam.usuario + ' / ' + cam.canal]];
+    $('aResumen').innerHTML = filas.filter(f => f[1] !== undefined && f[1] !== '')
+      .map(([k, v]) => `<div class="setrow" style="padding:4px 0"><div class="mut">${esc(k)}</div><div style="text-align:right;overflow-wrap:anywhere">${esc(v)}</div></div>`).join('');
+  }
+
   async function cargarInfo(){
     try {
-      const r = await api(`/api/camaras/${id}/info`); infoCargada = true;
+      const r = await api(`/api/camaras/${id}/info`); infoCargada = true; pintarResumen(r);
       const filas = Object.entries(r.sistema || {}).map(([k, v]) => [k, v]);
+      if (r.red && r.red.mac) filas.unshift(['MAC', r.red.mac]);
       if (r.hora) filas.push(['Hora de la cámara', r.hora]);
       $('iSis').innerHTML = filas.map(([k, v]) => `<div class="setrow" style="padding:4px 0"><div class="mut">${esc(k)}</div><div>${esc(v)}</div></div>`).join('') || 'Sin datos';
-    } catch (x) { $('iSis').textContent = x.message; }
+    } catch (x) { $('iSis').textContent = x.message; pintarResumen(null); }
   }
 
   // ---- Ajustes: fila de cámaras (misma sección de otra cámara) y botón para volver al directo
@@ -75,7 +89,7 @@
     const b = $('bBuscarIp'); b.disabled = true; b.textContent = 'Buscando…'; $('fMsg').textContent = '';
     try {
       const hall = await api('/api/camaras/buscar', 'POST');
-      $('fHallados').innerHTML = hall.map((f, i) => `<button class="btn out" style="width:100%;margin-top:4px" data-i="${i}" type="button">${esc(f.nombre)} · ${esc(f.ip)}</button>`).join('');
+      $('fHallados').innerHTML = hall.map((f, i) => `<button class="btn out" style="width:100%;margin-top:4px;height:auto;padding:8px 12px;text-align:left" data-i="${i}" type="button"><div>${esc(f.nombre)}  ·  ${esc(f.ip)}</div><div class="small mut">${f.mac ? 'MAC ' + esc(f.mac) : ''}${f.serie ? '  ·  SN ' + esc(f.serie) : ''}</div></button>`).join('');
       $('fHallados').querySelectorAll('button').forEach(x => x.onclick = () => { const f = hall[+x.dataset.i]; $('fHost').value = f.ip; $('fPuerto').value = f.puertoTcp || cam.puerto; });
       if (!hall.length) $('fMsg').textContent = 'No se encontró ninguna cámara. Escribe la IP a mano.';
     } catch (x) { $('fMsg').textContent = x.message; }

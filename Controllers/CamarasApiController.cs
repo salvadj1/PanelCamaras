@@ -171,7 +171,41 @@ namespace CentroSeguridad.Controllers
             return Ok();
         }
 
-        /// <summary>GET /api/camaras/{id}/info: información de sistema y hora de la cámara.</summary>
+        /// <summary>Convierte "0x0A01A8C0" (hex little-endian de las cámaras XM) en "192.168.1.10"; devuelve el texto original si no es hex.</summary>
+        private static string HexAIp(string hex)
+        {
+            if (string.IsNullOrEmpty(hex)) return "";
+            string h = hex.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? hex.Substring(2) : hex;
+            if (!uint.TryParse(h, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out uint v)) return hex;
+            return (v & 0xFF) + "." + ((v >> 8) & 0xFF) + "." + ((v >> 16) & 0xFF) + "." + ((v >> 24) & 0xFF);
+        }
+
+        /// <summary>Datos de red de la cámara (MAC, IP, máscara, puerta de enlace, nombre) del bloque NetWork.NetCommon; null si no se pueden leer.</summary>
+        private static object LeerRed(DvripClient c)
+        {
+            try
+            {
+                string raw = c.GetConfigRaw("NetWork.NetCommon");
+                if (string.IsNullOrEmpty(raw) || raw == "null") return null;
+                using (var doc = System.Text.Json.JsonDocument.Parse(raw))
+                {
+                    var n = doc.RootElement;
+                    if (n.ValueKind == System.Text.Json.JsonValueKind.Array && n.GetArrayLength() > 0) n = n[0];
+                    if (n.ValueKind != System.Text.Json.JsonValueKind.Object) return null;
+                    return new
+                    {
+                        mac = DvripClient.GetString(n, "MAC"),
+                        ip = HexAIp(DvripClient.GetString(n, "HostIP")),
+                        mascara = HexAIp(DvripClient.GetString(n, "Submask")),
+                        puerta = HexAIp(DvripClient.GetString(n, "GateWay")),
+                        nombre = DvripClient.GetString(n, "HostName")
+                    };
+                }
+            }
+            catch (Exception) { return null; }
+        }
+
+        /// <summary>GET /api/camaras/{id}/info: información de sistema, red (MAC, IP…) y hora de la cámara.</summary>
         [HttpGet("{id}/info")]
         public async Task<IActionResult> Info(string id)
         {
@@ -182,7 +216,7 @@ namespace CentroSeguridad.Controllers
                 {
                     var si = c.SystemInfo();
                     string hora; try { hora = c.GetTime(); } catch (Exception) { hora = "?"; }
-                    return new { sistema = si, hora };
+                    return new { sistema = si, hora, red = LeerRed(c) };
                 });
                 return Ok(r);
             }
