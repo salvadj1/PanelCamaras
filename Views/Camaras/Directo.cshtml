@@ -31,6 +31,8 @@
       <h2 class="sec">En esta app</h2>
       <div class="setrow"><div><div>Vigilar alarmas de esta cámara</div><div class="mut small">El servidor escucha sus eventos aunque no tengas la web abierta.</div></div><label class="switch"><input type="checkbox" id="cVigilar"><i></i></label></div>
       <div class="setrow"><div><div>RTSP con hash XM</div><div class="mut small">Actívalo si el vídeo no abre con tu contraseña normal.</div></div><label class="switch"><input type="checkbox" id="cHash"><i></i></label></div>
+      <h2 class="sec">Red</h2>
+      <div id="redPro"></div>
       <h2 class="sec">Ajustes de la cámara</h2>
       <div id="bloques"></div>
       <div class="card" style="margin:10px 0"><div class="mut small">Otro bloque (avanzado)</div>
@@ -57,6 +59,8 @@
       </details>
       <h2 class="sec">Acciones</h2>
       <div class="row"><button class="btn tonal" id="bHora" type="button">Sincronizar hora</button><button class="btn tonal" id="bReinicio" type="button">Reiniciar cámara</button></div>
+      <h2 class="sec">Herramientas</h2>
+      <div id="herram" style="margin-bottom:10px"></div>
       <h2 class="sec">Zona delicada</h2>
       <div class="row" style="margin-bottom:14px"><button class="btn out dz" id="bEliminar" type="button">Eliminar cámara</button></div>
     </div>
@@ -107,7 +111,11 @@
   <script src="~/js/xmcam-joystick.js"></script>
   <script src="~/js/xmcam-schemas.js"></script>
   <script src="~/js/xmcam-dzoom.js"></script>
+  <script src="~/js/xmcam-valores.js"></script>
+  <script src="~/js/xmcam-comparar.js"></script>
   <script src="~/js/xmcam-cfgpanel.js"></script>
   <script src="~/js/xmcam-directo.js"></script>
   <script src="~/js/xmcam-camajustes.js"></script>
+  <script src="~/js/xmcam-red.js"></script>
+  <script src="~/js/xmcam-herramientas.js"></script>
 }

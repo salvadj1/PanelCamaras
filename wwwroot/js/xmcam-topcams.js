@@ -13,7 +13,8 @@
     if (/\/config\/?$/.test(path)) return path + location.search;                  // mismo bloque
     if (/\/sd\/?$/.test(path)) return path;                                        // grabaciones SD (sin hora concreta)
     const pn = document.body.dataset.panel;                                        // directo: conserva Ajustes/Info
-    return path + (pn === 'ajustes' || pn === 'info' ? '?panel=' + pn : '');
+    const bl = document.body.dataset.bloque;
+    return path + (pn === 'ajustes' || pn === 'info' ? '?panel=' + pn + (pn === 'ajustes' && bl !== undefined ? '&bloque=' + bl : '') : '');
   }
   fetch('/api/camaras').then(r => r.json()).then(r => {
     const cams = r.camaras || []; if (!cams.length) return;

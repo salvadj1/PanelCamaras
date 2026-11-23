@@ -38,7 +38,8 @@
   $('bloques').querySelectorAll('.blk-it').forEach(it => it.querySelector('.blk').onclick = () => {
     const abrir = it.querySelector('.blk-body').hidden;
     $('bloques').querySelectorAll('.blk-it').forEach(o => { o.classList.remove('open'); o.querySelector('.blk-body').hidden = true; o.querySelector('.blk').setAttribute('aria-expanded', 'false'); });
-    if (!abrir) return;
+    if (!abrir){ delete document.body.dataset.bloque; return; }
+    document.body.dataset.bloque = it.dataset.i;   // lo lee la barra de cámaras para abrir el mismo bloque al cambiar de cámara
     it.classList.add('open'); it.querySelector('.blk-body').hidden = false; it.querySelector('.blk').setAttribute('aria-expanded', 'true');
     if (!it.dataset.listo){   // el editor se crea la primera vez que se abre
       it.dataset.listo = '1'; const [, , n, f] = XmSchemas.BLOCKS[+it.dataset.i];
@@ -121,5 +122,7 @@
   };
 
   lista().then(c => { cam = c; if (cam){ pintarCamara(); rellenarForm(); } }).catch(() => {});
-  const q = new URLSearchParams(location.search).get('panel'); if (P[q]) ir(q);
+  const qp = new URLSearchParams(location.search), q = qp.get('panel'); if (P[q]) ir(q);
+  // al cambiar de cámara se reabre el mismo bloque (para comparar ajustes entre cámaras)
+  const qb = qp.get('bloque'), itb = qb !== null && $('bloques').querySelector(`.blk-it[data-i="${+qb}"] .blk`); if (itb) setTimeout(() => itb.click(), 60);
 })();

@@ -2,7 +2,10 @@ using System;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Net;
 using System.Net.Http;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using CentroSeguridad.Models;
 using CentroSeguridad.Services;
@@ -271,6 +274,109 @@ namespace CentroSeguridad.Controllers
                 return Content(despues ?? "null", "application/json");
             }
             catch (Exception e) { return BadRequest(new { error = e.Message }); }
+        }
+
+        /// <summary>Datos de la IP que el usuario quiere poner a una cámara (para comprobarla antes de aplicar).</summary>
+        public class IpDto { public string Ip { get; set; } }
+
+        /// <summary>Bloques que prueba el explorador: los habituales de las cámaras XM/DVRIP (red, IPv6 por si el firmware lo trae, vídeo, alarmas, sistema…).</summary>
+        private static readonly string[] BloquesCandidatos =
+        {
+            "NetWork.NetCommon", "NetWork.NetDHCP", "NetWork.NetDNS", "NetWork.Wifi", "NetWork.NetIPv6", "NetWork.NetIPV6", "NetWork.IPv6", "NetWork.Ipv6",
+            "NetWork.NetPPPoE", "NetWork.NetDDNS", "NetWork.NetUPNP", "NetWork.UPnP", "NetWork.NetIPFilter", "NetWork.NetEmail", "NetWork.NetFTP", "NetWork.NetNTP",
+            "NetWork.NetRTSP", "NetWork.RTSP", "NetWork.OnvifPwdCheckout", "NetWork.Onvif", "NetWork.NetARSP", "NetWork.NetOrder", "NetWork.NetMobile", "NetWork.Mobile",
+            "NetWork.NetDecode", "NetWork.NetServer", "NetWork.Server", "NetWork.XMeye", "NetWork.Cloud", "NetWork.Nat", "NetWork.NetAlarmCenter",
+            "Detect.MotionDetect", "Detect.HumanDetection", "Detect.BlindDetect", "Detect.LossDetect", "Detect.FaceDetection", "Alarm.LocalAlarm", "Alarm.AlarmOut",
+            "Alarm.PIR", "Alarm.NetAlarm", "Alarm.NetIpConflict", "Alarm.StorageLowSpace", "Alarm.StorageFailure", "Alarm.StorageNotExist", "Alarm.LoginFailed",
+            "Simplify.Encode", "Camera.Param", "Camera.ParamEx", "Camera.WhiteLight", "Camera.ClearFog", "AVEnc.VideoWidget", "AVEnc.Encode.[0]", "AVEnc.Audio",
+            "Record", "Record.[0]", "StorageInfo", "Storage", "Uart.PTZ", "Uart.Comm",
+            "General.General", "General.Location", "General.AutoMaintain", "General.Spare", "System.TimeZone", "System.Locales", "Fb.Cfg",
+            "ChannelTitle", "Ability.EncodeCapability", "Ability.SystemFunction", "Ability.NetWork"
+        };
+
+        /// <summary>
+        /// GET /api/camaras/{id}/explorar[?completo=1]: prueba una lista de bloques habituales y devuelve cuáles admite la cámara
+        /// (con el JSON de cada uno si completo=1). Sirve para saber qué se puede configurar de verdad (IPv6, DNS, DHCP…) y para copias de seguridad.
+        /// </summary>
+        [HttpGet("{id}/explorar")]
+        public async Task<IActionResult> Explorar(string id, [FromQuery] int completo = 0)
+        {
+            if (_almacen.Obtener(id) == null) return NotFound();
+            try
+            {
+                var lista = await _control.EjecutarAsync(id, c =>
+                {
+                    var res = new System.Collections.Generic.List<object>();
+                    foreach (string nombre in BloquesCandidatos)
+                    {
+                        try
+                        {
+                            var r = LeerConIndice(c, nombre);
+                            bool ok = !string.IsNullOrEmpty(r.Item2) && r.Item2 != "null";
+                            JsonElement? datos = null;
+                            if (ok && completo == 1) { using (var d = JsonDocument.Parse(r.Item2)) datos = d.RootElement.Clone(); }
+                            res.Add(new { nombre, efectivo = r.Item1, ok, bytes = ok ? r.Item2.Length : 0, datos, error = (string)null });
+                        }
+                        catch (Exception e) { res.Add(new { nombre, efectivo = nombre, ok = false, bytes = 0, datos = (JsonElement?)null, error = e.Message }); }
+                    }
+                    return res;
+                });
+                return Ok(new { bloques = lista });
+            }
+            catch (Exception e) { return BadRequest(new { error = e.Message }); }
+        }
+
+        /// <summary>True si [ip] está en la misma subred que alguna interfaz de red activa de este equipo.</summary>
+        private static bool MismaSubred(IPAddress ip)
+        {
+            byte[] b = ip.GetAddressBytes();
+            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.OperationalStatus != OperationalStatus.Up) continue;
+                foreach (var ua in ni.GetIPProperties().UnicastAddresses)
+                {
+                    if (ua.Address.AddressFamily != AddressFamily.InterNetwork || ua.IPv4Mask == null) continue;
+                    byte[] a = ua.Address.GetAddressBytes(), m = ua.IPv4Mask.GetAddressBytes();
+                    bool igual = true;
+                    for (int i = 0; i < 4; i++) if ((a[i] & m[i]) != (b[i] & m[i])) { igual = false; break; }
+                    if (igual) return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>True si algo contesta en [ip]: responde a ping o acepta conexión en el puerto de la cámara (evita duplicar una IP en uso).</summary>
+        private static bool RespondeIp(IPAddress ip, int puerto)
+        {
+            try { using (var p = new Ping()) { if (p.Send(ip, 800).Status == IPStatus.Success) return true; } } catch (Exception) { }
+            try
+            {
+                using (var t = new TcpClient())
+                {
+                    var r = t.BeginConnect(ip, puerto, null, null);
+                    return r.AsyncWaitHandle.WaitOne(800) && t.Connected;
+                }
+            }
+            catch (Exception) { return false; }
+        }
+
+        /// <summary>
+        /// POST /api/camaras/{id}/red/comprobar {ip}: antes de cambiar la IP de una cámara comprueba que sea válida,
+        /// que esté en la misma subred que este equipo y que no la use ya otro dispositivo.
+        /// </summary>
+        [HttpPost("{id}/red/comprobar")]
+        public async Task<IActionResult> ComprobarIp(string id, [FromBody] IpDto d)
+        {
+            var cam = _almacen.Obtener(id);
+            if (cam == null) return NotFound();
+            string txt = (d?.Ip ?? "").Trim();
+            if (txt.Split('.').Length != 4 || !IPAddress.TryParse(txt, out IPAddress ip) || ip.AddressFamily != AddressFamily.InterNetwork)
+                return Ok(new { valida = false });
+            string norm = ip.ToString();
+            bool esActual = string.Equals(norm, cam.Host, StringComparison.OrdinalIgnoreCase);
+            bool misma = MismaSubred(ip);
+            bool enUso = !esActual && await Task.Run(() => RespondeIp(ip, cam.Puerto));
+            return Ok(new { valida = true, ip = norm, esActual, mismaSubred = misma, enUso });
         }
 
         /// <summary>POST /api/camaras/{id}/hora: pone la hora de la cámara igual a la del servidor.</summary>

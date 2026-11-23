@@ -288,3 +288,42 @@ input,select,textarea,.inp{font-size:16px}  /* 16 px evita el zoom automático d
 .switch{display:inline-block;vertical-align:middle}   /* sin esto el interruptor medía 0 de ancho dentro de las fichas de ajustes */
 .switch i{box-shadow:inset 0 0 0 1px var(--fg);opacity:.9}
 .switch input:checked+i{box-shadow:none}
+
+/* ===== 033: cámaras arriba, secciones en un raíl lateral (barra inferior en móvil) ===== */
+.shell{flex:1;min-height:0;display:flex;min-width:0}
+body.cam .shell{overflow:hidden}
+.shell>.xm-main{flex:1;min-width:0;width:auto;margin:0}
+.rail{flex:none;width:70px;display:flex;flex-direction:column;align-items:center;padding:8px 4px;background:var(--surface-variant);border-right:1px solid var(--outline);position:sticky;top:49px;align-self:flex-start;height:calc(100vh - 49px);height:calc(100dvh - 49px);overflow:auto}
+.rail .gnav{flex-direction:column;gap:4px;margin:0}
+.rail .gnav .ib{flex-direction:column;gap:2px;width:60px;min-height:56px;padding:6px 2px;font-size:10px;line-height:1.1;text-align:center;border-radius:12px}
+.rail .gnav .tx{display:block}
+body.cam .rail{position:static;height:auto;align-self:stretch}
+@media (max-width:760px){
+  .shell{flex-direction:column;padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
+  .rail{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;z-index:25;flex-direction:row;border-right:0;border-top:1px solid var(--outline);padding:2px 4px calc(2px + env(safe-area-inset-bottom,0px));align-self:auto}
+  body.cam .rail{position:fixed;align-self:auto}
+  .rail .gnav{flex-direction:row;width:100%;justify-content:space-around}
+  .rail .gnav .ib{flex:1;width:auto;min-height:52px}
+  #toasts{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+}
+.cmpov{position:fixed;inset:0;z-index:70;background:#0009;display:flex;align-items:center;justify-content:center;padding:12px}
+.cmppn{background:var(--bg);border:1px solid var(--outline);border-radius:16px;width:min(860px,100%);max-height:calc(100% - 8px);overflow:auto;padding:14px}
+.cmptab{overflow:auto;max-height:55vh}
+.cmptab table{width:100%;border-collapse:collapse;font-size:13px}
+.cmptab th,.cmptab td{padding:6px 8px;border-bottom:1px solid var(--outline);text-align:left;overflow-wrap:anywhere;vertical-align:top}
+.cmptab th{position:sticky;top:0;background:var(--bg);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--on-surface-variant)}
+.cmptab tr.dif td:nth-child(2),.cmptab tr.dif td:nth-child(3){background:color-mix(in srgb,var(--primary) 14%,transparent)}
+@media (max-width:640px){.cmpov{align-items:flex-end;padding:0}.cmppn{border-radius:18px 18px 0 0;width:100%}}
+.cfgbar{flex-wrap:wrap}
+.cfgbar .btn{min-width:90px}
+.bad{color:var(--error,#e5484d)}
+.w.malo .inp{border-color:var(--error,#e5484d)}
+.w .chips .chip{cursor:pointer}.w .chips input{margin-right:4px}
+.cfg-f.dim .inp{opacity:.55}
+#redBody .cfgbar{position:static;border-top:0;background:none}
+.ac-it{background:var(--surface-variant);border-radius:12px;margin:6px 0;overflow:hidden}
+.ac-it .ac-h{display:flex;align-items:center;gap:10px;width:100%;padding:12px;border:0;background:none;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.ac-it .bt{flex:1;min-width:0;display:flex;flex-direction:column}
+.ac-it .chev{transition:transform .15s;opacity:.7}.ac-it.open>.ac-h .chev{transform:rotate(180deg)}
+.ac-it .ac-b{padding:0 12px 12px}.ac-it .ac-b[hidden]{display:none}
+.ac-it .ac-b .cfgbar{position:static;border-top:0;background:none}

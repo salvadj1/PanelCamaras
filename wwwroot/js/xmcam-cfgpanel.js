@@ -35,13 +35,20 @@ window.XmConfig = (function(){
     return '';
   }
 
+  // ---- historial en localStorage (clave por cámara y bloque)
+  const hk = (id, n) => `xm.hist.${id}.${n}`;
+  function histGet(id, n){ try { return JSON.parse(localStorage.getItem(hk(id, n)) || '[]'); } catch (e) { return []; } }
+  function histSet(id, n, a){ try { localStorage.setItem(hk(id, n), JSON.stringify(a.slice(0, 8))); } catch (e) {} }
+  /** Guarda [json] (valor anterior de la cámara) como la versión más reciente del historial del bloque. */
+  function histPush(id, n, efectivo, json){ histSet(id, n, [{ t: Date.now(), n: efectivo, j: json }, ...histGet(id, n)]); }
+
   function mount(el, opt){
     const id = opt.id, name = opt.name;
     const filter = opt.filter ? (opt.filter instanceof RegExp ? opt.filter : new RegExp(opt.filter)) : null;
     let base = null, snap = null, hojas = [], efectivo = name, P = '';
     let abiertas = {}, advAbierto = false;
     el.classList.add('cp'); if (opt.titulo === false) el.classList.add('cp-inline');
-    el.innerHTML = '<div class="cp-body"><p class="mut">Cargando…</p></div><div class="cfgbar"><button class="btn out" data-a="json" type="button">Ver JSON</button><button class="btn tonal" data-a="rec" type="button">Recargar</button><button class="btn" data-a="save" type="button">Guardar</button></div><pre class="cp-json small" hidden></pre>';
+    el.innerHTML = '<div class="cp-body"><p class="mut">Cargando…</p></div><div class="cfgbar"><button class="btn out" data-a="json" type="button">Ver JSON</button><button class="btn tonal" data-a="rec" type="button">Recargar</button><button class="btn tonal" data-a="undo" type="button" hidden>Deshacer</button><button class="btn tonal" data-a="cmp" type="button">Comparar</button><button class="btn" data-a="save" type="button">Guardar</button></div><pre class="cp-json small" hidden></pre>';
     const body = el.querySelector('.cp-body'), jsonEl = el.querySelector('.cp-json');
     const url = () => `/api/camaras/${id}/config?name=${encodeURIComponent(efectivo)}`;
     const hoja = key => hojas.find(h => h.path.join('.') === key);
@@ -60,10 +67,12 @@ window.XmConfig = (function(){
       return `<input class="inp" type="${k.t === 'pass' ? 'password' : 'text'}" ${typeof v === 'number' ? 'inputmode="decimal"' : ''} data-k="${k0}" value="${esc(v)}" placeholder="${esc(ph || '')}">${k.unit ? ' <span class="small mut">' + esc(k.unit) + '</span>' : ''}`;
     }
 
-    /** Fila del bloque "Avanzado": nombre legible, control y, si hace falta, una pista; la ruta técnica queda en el tooltip. */
+    /** Fila del bloque "Avanzado": nombre legible, control según el tipo de valor (IP, máscara, horario, número…) y pista; la ruta técnica queda en el tooltip. */
     function filaAv(x, etq){
-      const last = String(x.path[x.path.length - 1]), k0 = clave(x);
+      const last = String(x.path[x.path.length - 1]), k0 = clave(x), V = window.XmVal;
+      const tipo = V ? V.kind(last, x.orig) : 'str';
       const esBool = typeof x.orig === 'boolean' || (typeof x.orig === 'string' && HEX.test(x.orig) && /Enable$/.test(last));
+      if (V && !esBool && V.necesitaWidget(tipo)) return `<div class="cfg-f" title="${esc(k0)}"><div class="tx"><div class="t">${esc(etq)}</div></div><div class="ctl">${V.widget(tipo, k0, x.orig)}</div></div>`;
       const ctl = control(x, { t: esBool ? 'toggle' : 'str' }, '—');
       const p = esBool ? '' : pista(last, x.orig);
       return `<div class="cfg-f${esBool ? ' tog' : ''}" title="${esc(k0)}"><div class="tx"><div class="t">${esc(etq)}</div>${p ? `<div class="h">${esc(p)}</div>` : ''}</div><div class="ctl">${ctl}</div></div>`;
@@ -102,6 +111,8 @@ window.XmConfig = (function(){
         h += '</details>';
       }
       body.innerHTML = h || '<p class="mut">Esta cámara no devolvió ajustes en este bloque.</p>';
+      if (window.XmVal) XmVal.wire(body);
+      refrescarDeshacer();
       body.querySelectorAll('input[type=range]').forEach(r => r.oninput = () => {
         const f = sch && sch.sections.flatMap(s => s.fields).find(x => P + x.key === r.dataset.k);
         const l = body.querySelector(`[data-lbl="${r.dataset.k}"]`); if (l) l.textContent = (f && f.kind.labels[r.value]) || r.value + ((f && f.kind.unit) || '');
@@ -146,12 +157,27 @@ window.XmConfig = (function(){
         if (!jsonEl.hidden) jsonEl.textContent = `Bloque: ${efectivo}\n` + JSON.stringify(base, null, 2);
       } catch (x) { body.innerHTML = `<p class="mut">${esc(x.message)}</p>`; }
     }
+    // ---- historial: antes de cada guardado se conserva el valor anterior del bloque (hasta 8 versiones, solo en este navegador)
+    const hget = () => histGet(id, name);
+    function refrescarDeshacer(){ const b = el.querySelector('[data-a=undo]'); if (b) b.hidden = !hget().length; }
+    async function deshacer(){
+      const h = hget(); if (!h.length) return; const x = h[0], f = new Date(x.t).toLocaleString();
+      if (!await confirmar('Deshacer el último guardado', `Se restauran los valores que tenía este bloque antes del cambio del ${f}.`, 'Restaurar')) return;
+      try { const rel = await api(`/api/camaras/${id}/config?name=${encodeURIComponent(x.n)}`, 'PUT', x.j); histSet(id, name, h.slice(1)); base = rel; pintar(); toast('Valores anteriores restaurados'); }
+      catch (e) { toast(e.message); }
+    }
+    /** Escribe un JSON completo en este bloque (lo usa «Comparar → traer de otra cámara»). */
+    async function escribir(json){
+      histPush(id, name, efectivo, snap);
+      const rel = await api(url(), 'PUT', json); base = rel; pintar(); return rel;
+    }
     async function guardar(){
       const { nuevo, tocadas } = recoger();
       if (!tocadas.length){ toast('Sin cambios'); return; }
       if (RIESGO.includes(name) && !await confirmar('Cambio delicado', 'Si cambias red o WiFi, la cámara puede quedar inaccesible. ¿Continuar?', 'Guardar')) return;
       try {
-        const rel = await api(url(), 'PUT', nuevo);
+        const previo = snap; const rel = await api(url(), 'PUT', nuevo);
+        histPush(id, name, efectivo, previo);
         base = rel; const antes = tocadas.slice(); pintar();
         const rechazados = antes.filter(t => { const v = S.getPath(rel, clave(t.h)); return v === undefined || S.norm(v) !== S.norm(t.val); });
         if (rechazados.length) toast('La cámara rechazó: ' + rechazados.map(t => S.friendly(String(t.h.path[t.h.path.length - 1]))).join(', '));
@@ -160,6 +186,8 @@ window.XmConfig = (function(){
     }
     el.querySelector('[data-a=rec]').onclick = cargar;
     el.querySelector('[data-a=save]').onclick = guardar;
+    el.querySelector('[data-a=undo]').onclick = deshacer;
+    el.querySelector('[data-a=cmp]').onclick = () => window.XmCompare ? XmCompare.abrir({ id, name: efectivo, base, escribirAqui: escribir }) : toast('Comparador no cargado');
     el.querySelector('[data-a=json]').onclick = () => {
       jsonEl.hidden = !jsonEl.hidden;
       if (!jsonEl.hidden) jsonEl.textContent = `Bloque: ${efectivo}\n` + JSON.stringify(base, null, 2);
@@ -167,5 +195,5 @@ window.XmConfig = (function(){
     cargar();
     return { cargar, guardar };
   }
-  return { mount };
+  return { mount, histPush, histGet };
 })();
