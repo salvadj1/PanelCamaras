@@ -36,7 +36,8 @@
     else if (t === 'num') ctl = `<input class="inp" type="number" inputmode="numeric" data-r="${n}" value="${esc(v)}">`;
     else if (t === 'ro') ctl = `<b>${esc(v)}</b>`;
     else ctl = `<input class="inp" type="${t === 'pass' ? 'password' : 'text'}" data-r="${n}" value="${esc(v)}" autocomplete="off">`;
-    return `<div class="cfg-f${t === 'bool' ? ' tog' : ''}${dis ? ' dim' : ''}"><div class="tx"><div class="t">${label}</div>${help ? `<div class="h">${help}</div>` : ''}</div><div class="ctl">${ctl}</div></div>`;
+    const vals = window.XmDic ? XmDic.valores(BLQ.common, key, v, t === 'ip' ? 'iphex' : t === 'bool' ? 'bool' : t === 'num' ? 'num' : 'str') : '';
+    return `<div class="cfg-f${t === 'bool' ? ' tog' : ''}${dis ? ' dim' : ''}"><div class="tx"><div class="t">${label}</div>${help ? `<div class="h">${help}</div>` : ''}${t === 'ro' || !vals ? '' : `<div class="v">Valores: ${esc(vals)}</div>`}</div><div class="ctl">${ctl}</div></div>`;
   }
   const tarjeta = (tit, filas) => filas.join('') ? `<div class="h2">${tit}</div><div class="cfg-card">${filas.join('')}</div>` : '';
 

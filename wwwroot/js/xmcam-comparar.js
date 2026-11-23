@@ -12,7 +12,8 @@ window.XmCompare = (function(){
   const ultimo = p => String(p[p.length - 1]);
   const clave = p => p.join('.');
   /** Etiqueta legible de una ruta ("Event Handler › Record Enable"). */
-  const etiqueta = p => p.filter(x => !/^\d+$/.test(String(x)) || false).map(x => S.friendly(String(x))).join(' › ') || p.join('.');
+  const etiqueta = p => window.XmDic ? XmDic.etiqueta(blq, p) : p.join('.');
+  let blq = '';
 
   async function leer(id, name){
     const r = await fetch(`/api/camaras/${id}/config?name=${encodeURIComponent(name)}`), j = await r.json().catch(() => null);
@@ -23,6 +24,7 @@ window.XmCompare = (function(){
   const mostrar = (last, v) => window.XmVal ? XmVal.mostrar(last, v) : String(v);
 
   function abrir(opt){
+    blq = opt.name;
     const ov = document.createElement('div'); ov.className = 'cmpov';
     ov.innerHTML = '<div class="cmppn" role="dialog" aria-label="Comparar cámaras"><div class="row" style="margin-bottom:8px"><b style="font-size:16px;flex:1">Comparar con otra cámara</b><button class="ib" data-a="x" aria-label="Cerrar">✕</button></div><div class="chips" data-a="cams" style="flex-wrap:wrap"></div><div data-a="cuerpo" class="mut" style="margin-top:10px">Elige la cámara con la que comparar.</div></div>';
     document.body.appendChild(ov);

@@ -327,3 +327,6 @@ body.cam .rail{position:static;height:auto;align-self:stretch}
 .ac-it .chev{transition:transform .15s;opacity:.7}.ac-it.open>.ac-h .chev{transform:rotate(180deg)}
 .ac-it .ac-b{padding:0 12px 12px}.ac-it .ac-b[hidden]{display:none}
 .ac-it .ac-b .cfgbar{position:static;border-top:0;background:none}
+
+/* 034: valores posibles bajo cada ajuste */
+.cfg-f .v{font-size:12px;line-height:1.35;color:var(--primary);margin-top:3px;overflow-wrap:anywhere}

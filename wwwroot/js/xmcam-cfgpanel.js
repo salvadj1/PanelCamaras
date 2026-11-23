@@ -14,15 +14,24 @@ window.XmConfig = (function(){
   const HEX = /^0x[0-9a-f]{8}$/i;
   const HORA = /^([01]) (\d\d:\d\d):\d\d-(\d\d:\d\d):\d\d$/;
 
-  /** Separa una ruta en {grupo: [segmentos], etiqueta}; los índices finales se añaden al nombre ("Time Section 1.2"). */
-  function partir(path, pref){
+  /** Separa una ruta en {grupo: [segmentos], etiqueta}; los índices finales se añaden al nombre ("Horario 1.2"). El nombre sale del diccionario en español. */
+  function partir(path, pref, blq){
     const p = path.slice(pref ? 1 : 0); let i = p.length - 1; const idx = [];
     while (i >= 0 && esNum(p[i])){ idx.unshift(Number(p[i]) + 1); i--; }
     const last = i >= 0 ? p[i] : '';
-    return { grp: p.slice(0, Math.max(i, 0)), etq: S.friendly(last) + (idx.length ? ' ' + idx.join('.') : '') };
+    return { grp: p.slice(0, Math.max(i, 0)), last, etq: XmDic.nombre(blq, last) + (idx.length ? ' ' + idx.join('.') : '') };
   }
-  /** Título legible de un grupo de rutas ("Event Handler › Time Section"). */
-  const tituloGrupo = g => g.length ? g.map(s => esNum(s) ? '#' + (Number(s) + 1) : S.friendly(s)).join(' › ') : 'General';
+  /** Título legible de un grupo de rutas ("Acciones al ocurrir el evento › Horario"). */
+  const tituloGrupo = (g, blq) => g.length ? g.map(s => esNum(s) ? '#' + (Number(s) + 1) : XmDic.nombre(blq, s)).join(' › ') : 'General';
+  /** Texto "Valores posibles" de un campo del esquema, según su tipo de control. */
+  function valoresEsquema(k){
+    if (k.t === 'toggle') return XmDic.SN;
+    if (k.t === 'slider') return `Entero de ${k.min} a ${k.max}${k.unit ? ' ' + k.unit.trim() : ''}`;
+    if (k.t === 'choice') return k.options.map(o => o[1]).join(' · ');
+    if (k.t === 'num') return 'Número entero' + (k.unit ? ' en ' + k.unit : '');
+    if (k.t === 'ro') return 'Solo lectura';
+    return 'Texto';
+  }
 
   /** Texto de ayuda para valores crípticos: máscaras de canales y horarios. */
   function pista(nombre, v){
@@ -68,14 +77,17 @@ window.XmConfig = (function(){
     }
 
     /** Fila del bloque "Avanzado": nombre legible, control según el tipo de valor (IP, máscara, horario, número…) y pista; la ruta técnica queda en el tooltip. */
-    function filaAv(x, etq){
-      const last = String(x.path[x.path.length - 1]), k0 = clave(x), V = window.XmVal;
+    function filaAv(x, etq, lastReal){
+      const last = lastReal || String(x.path[x.path.length - 1]), k0 = clave(x), V = window.XmVal;   // lastReal: la clave sin los índices finales (TimeSection, no 0)
       const tipo = V ? V.kind(last, x.orig) : 'str';
       const esBool = typeof x.orig === 'boolean' || (typeof x.orig === 'string' && HEX.test(x.orig) && /Enable$/.test(last));
-      if (V && !esBool && V.necesitaWidget(tipo)) return `<div class="cfg-f" title="${esc(k0)}"><div class="tx"><div class="t">${esc(etq)}</div></div><div class="ctl">${V.widget(tipo, k0, x.orig)}</div></div>`;
-      const ctl = control(x, { t: esBool ? 'toggle' : 'str' }, '—');
+      const desc = XmDic.descripcion(name, last, x.orig), vals = XmDic.valores(name, last, x.orig, esBool ? 'bool' : tipo);
+      const info = `<div class="h">${esc(desc)}</div><div class="v">Valores: ${esc(vals)}</div>`;
+      if (V && !esBool && V.necesitaWidget(tipo)) return `<div class="cfg-f" title="${esc(k0)}"><div class="tx"><div class="t">${esc(etq)}</div>${info}</div><div class="ctl">${V.widget(tipo, k0, x.orig)}</div></div>`;
+      const ro = /^No editable/.test(vals);   // MAC, estado, capacidad…: se muestran pero no se editan
+      const ctl = ro ? `<b>${esc(x.orig)}</b>` : control(x, { t: esBool ? 'toggle' : 'str' }, '—');
       const p = esBool ? '' : pista(last, x.orig);
-      return `<div class="cfg-f${esBool ? ' tog' : ''}" title="${esc(k0)}"><div class="tx"><div class="t">${esc(etq)}</div>${p ? `<div class="h">${esc(p)}</div>` : ''}</div><div class="ctl">${ctl}</div></div>`;
+      return `<div class="cfg-f${esBool ? ' tog' : ''}" title="${esc(k0)}"><div class="tx"><div class="t">${esc(etq)}</div>${info}${p ? `<div class="h">${esc(p)}</div>` : ''}</div><div class="ctl">${ctl}</div></div>`;
     }
 
     function pintar(){
@@ -95,7 +107,7 @@ window.XmConfig = (function(){
         for (const f of campos){
           usadas.add(P + f.key);
           const tog = f.kind.t === 'toggle';
-          filas += `<div class="cfg-f${tog ? ' tog' : ''}"><div class="tx"><div class="t">${esc(f.title)}</div><div class="h">${esc(f.help)}</div></div><div class="ctl">${control(hoja(P + f.key), f.kind)}</div></div>`;
+          filas += `<div class="cfg-f${tog ? ' tog' : ''}"><div class="tx"><div class="t">${esc(f.title)}</div><div class="h">${esc(f.help)}</div><div class="v">Valores: ${esc(valoresEsquema(f.kind))}</div></div><div class="ctl">${control(hoja(P + f.key), f.kind)}</div></div>`;
         }
         const i = n++, ab = abiertas[i] === undefined ? i === 0 : abiertas[i];
         h += `<details class="cfg-sec" data-i="${i}" ${ab ? 'open' : ''}><summary>${esc(s.title || 'Ajustes')}<small>${campos.length}</small></summary><div class="cfg-card">${filas}</div></details>`;
@@ -105,9 +117,9 @@ window.XmConfig = (function(){
       const total = rest.length; rest = rest.slice(0, 300);
       if (rest.length){
         const grupos = new Map();
-        for (const x of rest){ const p = partir(x.path, P); const k = p.grp.join('\u0001'); if (!grupos.has(k)) grupos.set(k, { g: p.grp, f: [] }); grupos.get(k).f.push(filaAv(x, p.etq)); }
+        for (const x of rest){ const p = partir(x.path, P, name); const k = p.grp.join('\u0001'); if (!grupos.has(k)) grupos.set(k, { g: p.grp, f: [] }); grupos.get(k).f.push(filaAv(x, p.etq, p.last)); }
         h += `<details class="cfg-sec adv" data-adv ${advAbierto ? 'open' : ''}><summary>Avanzado<small>${total}</small></summary>`;
-        for (const g of grupos.values()) h += `<h4 class="cfg-sub">${esc(tituloGrupo(g.g))}</h4><div class="cfg-card cfg-grid">${g.f.join('')}</div>`;
+        for (const g of grupos.values()) h += `<h4 class="cfg-sub">${esc(tituloGrupo(g.g, name))}</h4><div class="cfg-card cfg-grid">${g.f.join('')}</div>`;
         h += '</details>';
       }
       body.innerHTML = h || '<p class="mut">Esta cámara no devolvió ajustes en este bloque.</p>';

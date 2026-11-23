@@ -169,7 +169,7 @@ const XmSchemas = (() => {
     AlarmOutLatch: 'Duración de la salida de alarma', Dejitter: 'Antirrebote', AlarmInfo: 'Texto de la alarma', LogEnable: 'Guardar en el registro', MMSEnable: 'Enviar MMS', MatrixEnable: 'Activar matriz', ShortMsgEnable: 'Enviar SMS', TipEnable: 'Mostrar aviso en pantalla', TourEnable: 'Activar ronda', PtzEnable: 'Mover el PTZ', AlarmOutEnable: 'Activar salida de alarma', SSID: 'Nombre de la red WiFi', Keys: 'Contraseña WiFi', Address: 'Dirección', Speed: 'Velocidad'
   };
   /** Nombre legible de una clave técnica: usa el diccionario o separa las mayúsculas ("RecordEnable" → "Record Enable"). */
-  const friendly = last => FRIENDLY[last] || String(last).replace(/(?<=[a-z0-9])(?=[A-Z])/g, ' ');
+  const friendly = last => window.XmDic ? XmDic.nombre('', last) : (FRIENDLY[last] || String(last).replace(/(?<=[a-z0-9])(?=[A-Z])/g, ' '));
 
   // ---- ayudas de ruta JSON (compartidas)
   /** Convierte "A.B.0.C" en ["A","B",0,"C"]. */
