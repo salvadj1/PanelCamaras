@@ -1,14 +1,12 @@
 @{
-    Layout = "_Camaras";
+    Layout = "_App";
     ViewData["Titulo"] = ViewData["CamNombre"] as string ?? "Cámara";
-    ViewData["Tab"] = "camaras";
-    ViewData["Ancho"] = "completo";
-    ViewData["Cam"] = "1";
-    ViewData["Volver"] = "/";
     // Iconos de línea reutilizables (un solo trazado por icono).
     var paths = new System.Collections.Generic.Dictionary<string, string> {
+        ["back"] = "<path d=\"M15 5l-7 7 7 7\"/>",
+        ["down"] = "<path d=\"M6 9l6 6 6-6\"/>",
         ["pip"] = "<rect x=\"3\" y=\"4\" width=\"18\" height=\"14\" rx=\"2\"/><rect x=\"12\" y=\"11\" width=\"7\" height=\"5\" rx=\"1\" fill=\"currentColor\"/>",
-        ["max"] = "<path d=\"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5\"/>",
+        ["fill"] = "<path d=\"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5\"/>",
         ["full"] = "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M8 9H7v1M16 9h1v1M8 15H7v-1M16 15h1v-1\"/>",
         ["info"] = "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v6M12 7.5v.01\"/>",
         ["pause"] = "<path d=\"M6 4h3.5v16H6zM14.5 4H18v16h-3.5z\" fill=\"currentColor\"/>",
@@ -22,176 +20,182 @@
         ["gear"] = "<path d=\"M4 7h10M18 7h2M4 17h2M10 17h10\"/><circle cx=\"16\" cy=\"7\" r=\"2\"/><circle cx=\"8\" cy=\"17\" r=\"2\"/>",
         ["film"] = "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4\"/>",
         ["more"] = "<circle cx=\"5\" cy=\"12\" r=\"1.6\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\" fill=\"currentColor\"/><circle cx=\"19\" cy=\"12\" r=\"1.6\" fill=\"currentColor\"/>",
-        ["x"] = "<path d=\"M6 6l12 12M18 6L6 18\"/>"
+        ["x"] = "<path d=\"M6 6l12 12M18 6L6 18\"/>",
+        ["plus"] = "<path d=\"M12 5v14M5 12h14\"/>",
+        ["minus"] = "<path d=\"M5 12h14\"/>",
+        ["bell"] = "<path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0\"/>",
+        ["grid"] = "<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/>"
     };
     Microsoft.AspNetCore.Html.IHtmlContent Ic(string n, int s = 20) => new Microsoft.AspNetCore.Html.HtmlString(
         "<svg width=\"" + s + "\" height=\"" + s + "\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" + paths[n] + "</svg>");
 }
-@* Pantalla de directo "Panel deslizante": el vídeo ocupa todo el espacio con sus controles encima y los ajustes van en una hoja que se arrastra. *@
-<div class="camfull xmb" id="camfull">
-  <div class="camstage" id="stage">
-    <div class="player" id="player" data-cam="@ViewData["CamId"]">
-      <img id="snap" alt="" hidden>
-      <video id="vid" muted playsinline autoplay></video>
-    </div>
-    <p id="estado" class="small estado"></p>
-
-    @* ---- controles transparentes sobre el vídeo (xmcam-overlay.js) ---- *@
-    <div class="ov idle" id="ov">
-      <div class="ov-top">
-        <button class="ovb" id="ovMin" type="button" title="Minimizar: imagen en imagen" aria-label="Minimizar (imagen en imagen)">@Ic("pip")</button>
-        <div class="ovn"><b id="ovNombre">@ViewData["CamNombre"]</b><span id="ovSub"></span></div>
-        <span class="sp"></span>
-        <span class="ovrec" id="ovRec" hidden><i></i><b id="ovRecT">00:00</b></span>
-        <span class="ovbd live" id="ovLive">EN VIVO</span>
-        <button class="ovbd ovq" id="ovQ" type="button" title="Cambiar entre HD y SD">SD</button>
-        <button class="ovb" id="ovStats" type="button" title="Estadísticas de vídeo" aria-label="Estadísticas">@Ic("info")</button>
-        <button class="ovb" id="ovMax" type="button" title="Maximizar" aria-label="Maximizar">@Ic("max")</button>
-      </div>
-
-      <div class="ov-ptz" id="ovPtz" hidden>
-        <div class="ptzbox">
-          <canvas id="joy" aria-label="Joystick PTZ"></canvas>
-          <div class="grid2">
-            <button class="hold" data-cmd="ZoomTile" type="button">Z+</button>
-            <button class="hold" data-cmd="ZoomWide" type="button">Z−</button>
-            <button class="hold" data-cmd="FocusFar" type="button">F+</button>
-            <button class="hold" data-cmd="FocusNear" type="button">F−</button>
-          </div>
-        </div>
-        <div class="zmode" title="Z+ y Z− mueven el zoom de la cámara (óptico) o acercan la imagen en el navegador (digital)">
-          <span>Zoom</span><button class="chip" id="zOpt" type="button">Óptico</button><button class="chip" id="zDig" type="button">Digital</button>
-        </div>
-      </div>
-
-      <div class="dzoom" role="group" aria-label="Zoom digital">
-        <button id="dzMas" type="button" title="Acercar (zoom digital)" aria-label="Acercar (zoom digital)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-        <button id="dzMenos" type="button" title="Alejar" aria-label="Alejar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
-        <button id="dzReset" type="button" title="Quitar el zoom" aria-label="Quitar el zoom" hidden></button>
-      </div>
-
-      <div class="ov-bot">
-        <div class="g">
-          <button class="ovb" id="ovPlay" type="button" title="Pausa / continuar" aria-label="Pausa">@Ic("pause")</button>
-          <button class="ovb" id="ovAudio" type="button" title="Sonido" aria-label="Sonido">@Ic("mute")</button>
-        </div>
-        <div class="g">
-          <button class="ovb" id="ovFoto" type="button" title="Foto" aria-label="Foto">@Ic("snap")</button>
-          <button class="ovb" id="ovGrab" type="button" title="Grabar un clip en este dispositivo" aria-label="Grabar">@Ic("rec")</button>
-          <button class="ovb" id="ovPtzB" type="button" title="Mover la cámara (PTZ)" aria-label="Mover la cámara">@Ic("move")</button>
-          <button class="ovb" id="ovPreB" type="button" title="Posiciones guardadas" aria-label="Posiciones guardadas">@Ic("star")</button>
-        </div>
-        <div class="g">
-          <button class="ovb" id="ovQs" type="button" title="Ajustes rápidos de imagen" aria-label="Ajustes rápidos">@Ic("sun")</button>
-          <button class="ovb" id="ovFs" type="button" title="Pantalla completa" aria-label="Pantalla completa">@Ic("full")</button>
-        </div>
-      </div>
-
-      <div class="ov-pop ov-pre" id="ovPre" hidden>
-        <h4>Posiciones guardadas</h4>
-        <p class="small">Toca para ir · mantén para guardar la actual</p>
-        <div class="presets" id="presets"></div>
-      </div>
-      <div class="ov-pop ov-q" id="ovQp" hidden>
-        <div class="qh"><b>Ajustes rápidos · imagen</b><button class="ovb" id="ovQx" type="button" aria-label="Cerrar">@Ic("x", 18)</button></div>
-        <div class="qb" id="ovQBody"></div>
-        <div class="qf"><button class="btn tonal" id="ovQall" type="button">Todos los ajustes ›</button></div>
-      </div>
-      <div class="ov-flash" id="ovFlash"></div>
-    </div>
+@* Pantalla de directo "Visor": el vídeo ocupa toda la ventana con controles de cristal encima y un panel propio (cajón en PC, hoja en móvil). *@
+<div class="ax-stage" id="stage">
+  <div class="player" id="player" data-cam="@ViewData["CamId"]">
+    <img id="snap" alt="" hidden>
+    <video id="vid" muted playsinline autoplay></video>
   </div>
+  <p id="estado" class="estado"></p>
 
-  @* ---- hoja deslizante: Cámaras · Ajustes · Grabaciones · Más ---- *@
-  <section class="hoja" id="hoja" aria-label="Panel de la cámara">
-    <div class="hoja-grab" id="hojaGrab" role="separator" aria-label="Arrastra para subir o bajar el panel" tabindex="0"><i></i></div>
-    <div class="hoja-tabs" id="hojaTabs" role="tablist">
-      <button type="button" data-t="camaras" role="tab">@Ic("video", 22)<span>Cámaras</span></button>
-      <button type="button" data-t="ajustes" role="tab">@Ic("gear", 22)<span>Ajustes</span></button>
-      <button type="button" data-t="grab" role="tab">@Ic("film", 22)<span>Grabaciones</span></button>
-      <button type="button" data-t="mas" role="tab">@Ic("more", 22)<span>Más</span></button>
+  <div class="ov idle" id="ov">
+    <div class="top">
+      <a class="gb gl" id="ovBack" href="/" title="Volver al mosaico" aria-label="Volver al mosaico">@Ic("back", 22)</a>
+      <button class="camp gl" id="ovCam" type="button" aria-haspopup="true" aria-label="Cambiar de cámara">
+        <i class="dot ok" id="ovDot"></i>
+        <span class="nm"><b id="ovNombre">@ViewData["CamNombre"]</b><small><span id="ovSub"></span><span class="sepd"> · </span><span id="ovLive" class="lv">EN VIVO</span></small></span>
+        @Ic("down", 16)
+      </button>
+      <span class="sp"></span>
+      <span class="gl rec" id="ovRec" hidden><i></i><b id="ovRecT">00:00</b></span>
+      <button class="gl qchip" id="ovQ" type="button" title="Cambiar entre HD y SD" aria-label="Calidad">SD</button>
+      <button class="gb gl" id="ovFs" type="button" title="Pantalla completa" aria-label="Pantalla completa">@Ic("full")</button>
+      <button class="gb gl" id="ovMore" type="button" title="Más opciones" aria-label="Más opciones" aria-haspopup="true">@Ic("more")</button>
     </div>
-    <div class="hoja-body" id="hojaBody">
 
-      <div class="hp" id="pCamaras" data-t="camaras">
-        <div class="hp-h"><h2>Cámaras</h2><a class="chip" href="/camaras/nueva">+ Añadir / buscar</a></div>
-        <div id="hCams" class="hcams">Cargando…</div>
+    <div class="ptz gl" id="ovPtz" hidden>
+      <canvas id="joy" aria-label="Joystick PTZ"></canvas>
+      <div class="grid2">
+        <button class="hold" data-cmd="ZoomTile" type="button" title="Zoom óptico +">Z+</button>
+        <button class="hold" data-cmd="ZoomWide" type="button" title="Zoom óptico −">Z−</button>
+        <button class="hold" data-cmd="FocusFar" type="button" title="Enfoque lejos">F+</button>
+        <button class="hold" data-cmd="FocusNear" type="button" title="Enfoque cerca">F−</button>
       </div>
-
-      <div class="hp" id="pAjustes" data-t="ajustes" hidden>
-        <div id="ajLista">
-          <div class="hp-h"><h2>Ajustes · <span id="ajNombre"></span></h2></div>
-          <div class="card" id="aResumen" style="margin:6px 0 10px">Cargando…</div>
-          <div class="hsrch"><input class="inp" id="ajBuscar" type="search" placeholder="Buscar: wifi, ip, sensibilidad, audio, hora…" autocomplete="off" aria-label="Buscar ajustes"></div>
-          <p class="mut small hnote">Todos los ajustes de la cámara, agrupados. El vídeo se actualiza mientras editas.</p>
-          <div class="lst" id="catLista"></div>
-        </div>
-        <div id="ajCat" hidden>
-          <div class="hp-h"><button class="hback" id="ajVolver" type="button">‹ Ajustes</button><h2 id="catTitulo"></h2></div>
-          <p class="mut small hnote" id="catDesc"></p>
-          <div id="catChips" class="chips"></div>
-          <div id="catCuerpo"></div>
-        </div>
-      </div>
-
-      <div class="hp" id="pGrab" data-t="grab" hidden>
-        <div class="hp-h"><h2>Grabaciones</h2></div>
-        <div class="lst">
-          <a class="lr" id="gSd" href="/camara/@ViewData["CamId"]/sd"><span class="sq" style="background:#8b5cf6">@Ic("film")</span><span class="tt"><b>Grabaciones de la tarjeta SD</b><small>Línea de tiempo, reproducción y exportar clips</small></span><span class="chv">›</span></a>
-          <a class="lr" href="/eventos"><span class="sq" style="background:#ef4444">@Ic("sun")</span><span class="tt"><b>Eventos y alarmas</b><small>Historial de movimiento y personas</small></span><span class="chv">›</span></a>
-          <a class="lr" href="/grabaciones"><span class="sq" style="background:#14b8a6">@Ic("video")</span><span class="tt"><b>Grabaciones de todas las cámaras</b><small>Vista general del servidor</small></span><span class="chv">›</span></a>
-        </div>
-        <h4 class="hsub">Esta sesión</h4>
-        <div class="card small mut">El botón <b>●</b> de los controles del vídeo graba un clip en este dispositivo (formato WebM) mientras lo mantengas activo.</div>
-      </div>
-
-      <div class="hp" id="pMas" data-t="mas" hidden>
-        <div class="hp-h"><h2>Más</h2></div>
-        <div class="card" style="margin:6px 0 10px"><div class="row" style="justify-content:space-between"><b id="iNombre"></b><button class="btn tonal" id="bNombre" type="button">Cambiar nombre</button></div></div>
-        <h4 class="hsub">En esta app</h4>
-        <div class="setrow"><div><div>Vigilar alarmas de esta cámara</div><div class="mut small">El servidor escucha sus eventos aunque no tengas la web abierta.</div></div><label class="switch"><input type="checkbox" id="cVigilar"><i></i></label></div>
-        <div class="setrow"><div><div>RTSP con hash XM</div><div class="mut small">Actívalo si el vídeo no abre con tu contraseña normal.</div></div><label class="switch"><input type="checkbox" id="cHash"><i></i></label></div>
-        <h4 class="hsub">Herramientas</h4>
-        <div id="herram" style="margin-bottom:10px"></div>
-        <div class="card" style="margin:10px 0"><div class="mut small">Otro bloque de configuración (avanzado)</div>
-          <div class="row"><input class="inp" id="bloqueOtro" placeholder="p. ej. Detect.BlindDetect" style="flex:1"><button class="btn tonal" id="bloqueIr" type="button">Abrir</button></div></div>
-        <h4 class="hsub">Conexión</h4>
-        <div class="card small" id="iConex"></div>
-        <details class="card" id="cForm" style="margin:10px 0">
-          <summary>Cambiar IP, puertos o contraseña</summary>
-          <p class="mut small">Si has cambiado la IP de la cámara, escribe la nueva aquí. Se conservan sus reglas y su historial.</p>
-          <div class="row"><button class="btn tonal" id="bBuscarIp" type="button">Buscar en la red</button></div>
-          <div id="fHallados"></div>
-          <label class="field"><span>IP o dirección</span><input id="fHost" inputmode="url" autocomplete="off"></label>
-          <div class="row" style="align-items:flex-start">
-            <label class="field" style="flex:1;min-width:110px"><span>Puerto</span><input id="fPuerto" inputmode="numeric"></label>
-            <label class="field" style="flex:1;min-width:110px"><span>Canal</span><input id="fCanal" inputmode="numeric"></label>
-          </div>
-          <label class="field"><span>Usuario</span><input id="fUser" autocomplete="off"></label>
-          <label class="field"><span>Contraseña (vacío = no cambiar)</span><input id="fPass" type="password" autocomplete="new-password"></label>
-          <div class="row" style="align-items:flex-start">
-            <label class="field" style="flex:1;min-width:110px"><span>Puerto RTSP</span><input id="fRtsp" inputmode="numeric"></label>
-            <label class="field" style="flex:1;min-width:110px"><span>Puerto HTTP</span><input id="fHttp" inputmode="numeric"></label>
-          </div>
-          <div class="row"><button class="btn" id="bGuardarCon" type="button">Probar y guardar</button></div>
-          <p class="small" id="fMsg" style="margin:6px 0 0"></p>
-        </details>
-        <h4 class="hsub">Sistema de la cámara</h4>
-        <div class="card small" id="iSis">Cargando…</div>
-        <h4 class="hsub">Acciones</h4>
-        <div class="row"><button class="btn tonal" id="bHora" type="button">Sincronizar hora</button><button class="btn tonal" id="bReinicio" type="button">Reiniciar cámara</button></div>
-        <h4 class="hsub">Zona delicada</h4>
-        <div class="row" style="margin-bottom:14px"><button class="btn out dz" id="bEliminar" type="button">Eliminar cámara</button></div>
+      <div class="zmode" title="Z+ y Z− mueven el zoom de la cámara (óptico) o acercan la imagen en el navegador (digital)">
+        <button class="chip" id="zOpt" type="button">Óptico</button><button class="chip" id="zDig" type="button">Digital</button>
       </div>
     </div>
-  </section>
 
-  @* Botones originales que usa xmcam-directo.js; los controles transparentes los activan. Quedan ocultos. *@
-  <div class="legacy" hidden>
-    <div id="carrusel"></div>
-    <button id="cHd" type="button">HD</button><button id="cSd" type="button">SD</button>
-    <button id="bAudio" type="button">Sin audio</button><button id="bFoto" type="button">Foto</button><button id="bStats" type="button">Estadísticas</button>
-    <span id="bQ">SD</span><div id="redStash"><div id="redPro"></div></div>
+    <div class="dzoom" role="group" aria-label="Zoom digital">
+      <button class="gl" id="dzMas" type="button" title="Acercar (zoom digital)" aria-label="Acercar">@Ic("plus")</button>
+      <button class="gl" id="dzMenos" type="button" title="Alejar" aria-label="Alejar">@Ic("minus")</button>
+      <button class="gl" id="dzReset" type="button" title="Quitar el zoom" aria-label="Quitar el zoom" hidden></button>
+    </div>
+
+    <div class="dock gl" id="dock" role="toolbar" aria-label="Controles del vídeo">
+      <button class="gb" id="ovPlay" type="button" title="Pausa / continuar" aria-label="Pausa">@Ic("pause")</button>
+      <button class="gb" id="ovAudio" type="button" title="Sonido" aria-label="Sonido">@Ic("mute")</button>
+      <i class="sep"></i>
+      <button class="gb" id="ovFoto" type="button" title="Foto" aria-label="Foto">@Ic("snap")</button>
+      <button class="gb" id="ovGrab" type="button" title="Grabar un clip en este dispositivo" aria-label="Grabar">@Ic("rec")</button>
+      <i class="sep"></i>
+      <button class="gb" id="ovPtzB" type="button" title="Mover la cámara (PTZ)" aria-label="Mover la cámara">@Ic("move")</button>
+      <button class="gb" id="ovPreB" type="button" title="Posiciones guardadas" aria-label="Posiciones guardadas">@Ic("star")</button>
+      <button class="gb" id="ovQs" type="button" title="Ajustes rápidos de imagen" aria-label="Ajustes rápidos">@Ic("sun")</button>
+      <i class="sep"></i>
+      <button class="gb main" id="ovGear" type="button" title="Ajustes y más" aria-label="Abrir el panel de ajustes">@Ic("gear")</button>
+    </div>
+
+    @* ---- ventanas flotantes ---- *@
+    <div class="pop solid pop-cams" id="ovCams" hidden>
+      <div class="pop-h"><b>Cámaras</b></div>
+      <div id="csLista" class="cs-l">Cargando…</div>
+      <div class="cs-f"><a href="/">@Ic("grid", 18)<span>Mosaico</span></a><a href="/camaras/nueva">@Ic("plus", 18)<span>Añadir o buscar</span></a></div>
+    </div>
+    <div class="pop solid pop-more" id="ovMoreP" hidden>
+      <button type="button" class="mr" id="mStats">@Ic("info")<span><b>Estadísticas</b><small>Fotogramas, tasa de bits y retardo</small></span></button>
+      <button type="button" class="mr" id="mPip">@Ic("pip")<span><b>Imagen en imagen</b><small>El vídeo flota sobre otras ventanas</small></span></button>
+      <button type="button" class="mr" id="mFill">@Ic("fill")<span><b>Llenar la pantalla</b><small>Recorta los bordes y cierra el panel</small></span></button>
+    </div>
+    <div class="pop solid pop-pre" id="ovPre" hidden>
+      <div class="pop-h"><b>Posiciones guardadas</b><small>Toca para ir · mantén para guardar la actual</small></div>
+      <div class="presets" id="presets"></div>
+    </div>
+    <div class="pop solid pop-q" id="ovQp" hidden>
+      <div class="pop-h"><b>Imagen</b><button class="gb sm" id="ovQx" type="button" aria-label="Cerrar">@Ic("x", 18)</button></div>
+      <div class="qb" id="ovQBody"></div>
+      <div class="qf"><button class="btn tonal" id="ovQall" type="button">Todos los ajustes de imagen</button></div>
+    </div>
+    <div class="ov-flash" id="ovFlash"></div>
   </div>
+</div>
+
+@* ---- panel propio: cajón lateral en pantallas anchas, hoja deslizante en móvil ---- *@
+<aside class="pn" id="pn" aria-label="Panel de la cámara">
+  <div class="pn-grab" id="pnGrab" role="separator" aria-label="Arrastra para subir o bajar el panel" tabindex="0"><i></i></div>
+  <header class="pn-head" id="pnHead">
+    <nav class="seg" id="pnTabs" role="tablist">
+      <button type="button" data-t="ajustes" role="tab">@Ic("gear", 18)<span>Ajustes</span></button>
+      <button type="button" data-t="archivos" role="tab">@Ic("film", 18)<span>Archivos</span></button>
+      <button type="button" data-t="mas" role="tab">@Ic("more", 18)<span>Más</span></button>
+    </nav>
+    <button class="gb sm x" id="pnX" type="button" aria-label="Cerrar el panel">@Ic("x", 20)</button>
+  </header>
+
+  <div class="pn-body" id="pnBody">
+    <section class="pp" data-t="ajustes" id="pAjustes">
+      <div id="ajLista">
+        <div class="card" id="aResumen">Cargando…</div>
+        <label class="srch"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="ajBuscar" type="search" placeholder="Buscar: wifi, ip, sensibilidad, audio…" autocomplete="off" aria-label="Buscar ajustes"></label>
+        <div class="tiles" id="catLista"></div>
+      </div>
+      <div id="ajCat" hidden>
+        <div class="chd"><button class="gb sm" id="ajVolver" type="button" aria-label="Volver a los ajustes">@Ic("back", 20)</button><div><h2 id="catTitulo"></h2><p id="catDesc"></p></div></div>
+        <div id="catCuerpo"></div>
+      </div>
+    </section>
+
+    <section class="pp" data-t="archivos" id="pArchivos" hidden>
+      <h3 class="pt">Archivos de esta cámara</h3>
+      <a class="ar" href="/camara/@ViewData["CamId"]/sd"><span class="ic" style="background:#8b5cf6">@Ic("film", 22)</span><span><b>Tarjeta SD</b><small>Línea de tiempo, reproducción y exportar clips</small></span></a>
+      <a class="ar" href="/eventos"><span class="ic" style="background:#ef4444">@Ic("bell", 22)</span><span><b>Eventos y alarmas</b><small>Historial de movimiento y personas</small></span></a>
+      <a class="ar" href="/grabaciones"><span class="ic" style="background:#14b8a6">@Ic("video", 22)</span><span><b>Grabaciones del servidor</b><small>Vista general de todas las cámaras</small></span></a>
+      <p class="note">El botón <b>●</b> del vídeo graba un clip en este dispositivo (WebM) mientras lo mantengas activo.</p>
+    </section>
+
+    <section class="pp" data-t="mas" id="pMas" hidden>
+      <div class="card idc"><div><small class="mut">Cámara</small><b id="iNombre"></b></div><button class="btn tonal" id="bNombre" type="button">Cambiar nombre</button></div>
+
+      <h3 class="pt">Apariencia</h3>
+      <div class="themes" id="temas"></div>
+      <div class="setrow"><div><div>Seguir el modo del sistema</div><div class="mut small">Cambia a un tema claro u oscuro según el dispositivo.</div></div><label class="switch"><input type="checkbox" id="tSeguir"><i></i></label></div>
+
+      <h3 class="pt">En esta app</h3>
+      <div class="setrow"><div><div>Vigilar alarmas de esta cámara</div><div class="mut small">El servidor escucha sus eventos aunque no tengas la web abierta.</div></div><label class="switch"><input type="checkbox" id="cVigilar"><i></i></label></div>
+      <div class="setrow"><div><div>RTSP con hash XM</div><div class="mut small">Actívalo si el vídeo no abre con tu contraseña normal.</div></div><label class="switch"><input type="checkbox" id="cHash"><i></i></label></div>
+
+      <h3 class="pt">Herramientas</h3>
+      <div id="herram"></div>
+      <div class="card"><div class="mut small">Otro bloque de configuración (avanzado)</div>
+        <div class="row"><input class="inp" id="bloqueOtro" placeholder="p. ej. Detect.BlindDetect" style="flex:1"><button class="btn tonal" id="bloqueIr" type="button">Abrir</button></div></div>
+
+      <h3 class="pt">Conexión</h3>
+      <div class="card small" id="iConex"></div>
+      <details class="card" id="cForm">
+        <summary>Cambiar IP, puertos o contraseña</summary>
+        <p class="mut small">Si has cambiado la IP de la cámara, escribe la nueva aquí. Se conservan sus reglas y su historial.</p>
+        <div class="row"><button class="btn tonal" id="bBuscarIp" type="button">Buscar en la red</button></div>
+        <div id="fHallados"></div>
+        <label class="field"><span>IP o dirección</span><input id="fHost" inputmode="url" autocomplete="off"></label>
+        <div class="row" style="align-items:flex-start">
+          <label class="field" style="flex:1;min-width:110px"><span>Puerto</span><input id="fPuerto" inputmode="numeric"></label>
+          <label class="field" style="flex:1;min-width:110px"><span>Canal</span><input id="fCanal" inputmode="numeric"></label>
+        </div>
+        <label class="field"><span>Usuario</span><input id="fUser" autocomplete="off"></label>
+        <label class="field"><span>Contraseña (vacío = no cambiar)</span><input id="fPass" type="password" autocomplete="new-password"></label>
+        <div class="row" style="align-items:flex-start">
+          <label class="field" style="flex:1;min-width:110px"><span>Puerto RTSP</span><input id="fRtsp" inputmode="numeric"></label>
+          <label class="field" style="flex:1;min-width:110px"><span>Puerto HTTP</span><input id="fHttp" inputmode="numeric"></label>
+        </div>
+        <div class="row"><button class="btn" id="bGuardarCon" type="button">Probar y guardar</button></div>
+        <p class="small" id="fMsg" style="margin:6px 0 0"></p>
+      </details>
+
+      <h3 class="pt">Sistema de la cámara</h3>
+      <div class="card small" id="iSis">Cargando…</div>
+      <h3 class="pt">Acciones</h3>
+      <div class="row"><button class="btn tonal" id="bHora" type="button">Sincronizar hora</button><button class="btn tonal" id="bReinicio" type="button">Reiniciar cámara</button></div>
+      <h3 class="pt">Zona delicada</h3>
+      <div class="row" style="margin-bottom:18px"><button class="btn out dz" id="bEliminar" type="button">Eliminar cámara</button></div>
+    </section>
+  </div>
+</aside>
+
+@* Botones originales que usa xmcam-directo.js; los controles de cristal los activan. Quedan ocultos. *@
+<div class="legacy" hidden>
+  <div id="carrusel"></div>
+  <button id="cHd" type="button">HD</button><button id="cSd" type="button">SD</button>
+  <button id="bAudio" type="button">Sin audio</button><button id="bFoto" type="button">Foto</button><button id="bStats" type="button">Estadísticas</button>
+  <span id="bQ">SD</span><div id="redStash"><div id="redPro"></div></div>
 </div>
 @section Scripts {
   <script src="~/js/xmcam-live.js"></script>
@@ -206,6 +210,6 @@
   <script src="~/js/xmcam-camajustes.js"></script>
   <script src="~/js/xmcam-red.js"></script>
   <script src="~/js/xmcam-herramientas.js"></script>
-  <script src="~/js/xmcam-overlay.js"></script>
-  <script src="~/js/xmcam-hoja.js"></script>
+  <script src="~/js/xmcam-app-video.js"></script>
+  <script src="~/js/xmcam-app-panel.js"></script>
 }

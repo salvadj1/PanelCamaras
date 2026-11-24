@@ -142,6 +142,7 @@
     } else { toast('Red guardada'); cargar(); }
   }
 
-  host.innerHTML = '<div class="ac-it" id="redIt"><button class="ac-h" type="button" aria-expanded="false"><span class="bt"><b>Red profesional</b><span class="sm mut">IP, máscara, puerta de enlace, DHCP, DNS, Wi‑Fi e IPv6</span></span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ac-b" id="redBody" hidden></div></div>';
-  $('redIt').querySelector('.ac-h').onclick = () => { const b = $('redBody'), abrir = b.hidden; b.hidden = !abrir; $('redIt').classList.toggle('open', abrir); if (abrir && !cargado) cargar(); };
+  // Sin acordeón: el panel lo coloca dentro de la categoría "Red y Wi‑Fi" y llama a XmRed.abrir() para leer la cámara la primera vez.
+  host.innerHTML = '<div id="redBody"><p class="mut">Leyendo la red de la cámara…</p></div>';
+  window.XmRed = { abrir(){ if (!cargado) cargar(); } };
 })();

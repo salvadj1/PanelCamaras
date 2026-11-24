@@ -1,0 +1,33 @@
+@{
+    var titulo = ViewData["Titulo"] as string ?? "Cámara";
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>@titulo · Panel Camaras</title>
+<script>
+  // Aplica el tema guardado antes de pintar (evita el parpadeo).
+  (function(){ try {
+    var t = localStorage.getItem('xm.theme') || 'NVR_DARK';
+    var f = localStorage.getItem('xm.follow'); f = (f === null) ? true : f === 'true';
+    var dark = matchMedia('(prefers-color-scheme: dark)').matches;
+    var D = { NVR_DARK: 1, AMOLED: 1, CYBER: 1, VISOR: 1, ATARDECER: 1, CONSOLA: 1, OCEANO: 1, CONTRASTE: 1 };   // temas oscuros
+    var r = !f ? t : (!!D[t] === dark ? t : (dark ? 'NVR_DARK' : 'MATERIAL_LIGHT'));
+    document.documentElement.setAttribute('data-theme', r);
+  } catch (e) {} })();
+</script>
+<link rel="stylesheet" href="~/css/xmcam.css">
+<link rel="stylesheet" href="~/css/xmcam-temas.css">
+<link rel="stylesheet" href="~/css/xmcam-app.css">
+</head>
+@* Pantalla de aplicación: sin cabecera ni raíl; cada vista dibuja todo a pantalla completa. *@
+<body class="ax">
+@RenderBody()
+<script src="~/js/xmcam.js"></script>
+<script src="~/js/xmcam-avisos.js"></script>
+@RenderSection("Scripts", required: false)
+</body>
+</html>
