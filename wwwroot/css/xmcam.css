@@ -330,3 +330,6 @@ body.cam .rail{position:static;height:auto;align-self:stretch}
 
 /* 034: valores posibles bajo cada ajuste */
 .cfg-f .v{font-size:12px;line-height:1.35;color:var(--primary);margin-top:3px;overflow-wrap:anywhere}
+
+/* 035: estadísticas de vídeo */
+.livestats{position:absolute;left:6px;bottom:6px;z-index:5;max-width:calc(100% - 12px);background:#000b;color:#9fffb0;font:11px/1.35 ui-monospace,Consolas,monospace;white-space:pre-wrap;padding:4px 7px;border-radius:6px;pointer-events:none}

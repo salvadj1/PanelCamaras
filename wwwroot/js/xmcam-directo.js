@@ -11,7 +11,9 @@
   const setEstado = t => { $('estado').textContent = t || ''; };
   const srcName = () => `${id}_${stream === 0 ? 'hd' : 'sd'}${audio ? '_a' : ''}`;
 
+  let statsOff = null;   // quita el panel de estadísticas del vídeo
   function parar(){
+    if (statsOff){ statsOff(); statsOff = null; }
     if (live){ live.stop(); live = null; }
     clearInterval(snapTimer); clearTimeout(audioTimer);
   }
@@ -26,6 +28,7 @@
       $('vid').hidden = false; $('snap').hidden = true; $('vid').muted = !audio;
       live = new XmLive($('vid'), srcName(), { onFrame: () => setEstado(''), onState: setEstado });
       live.start();
+      if (store.get('directoStats', '0') === '1') statsOff = XmLive.panel(live, $('vid').parentElement);
       if (audio){
         // Sin ffmpeg en el servidor no hay stream con audio: se vuelve al vídeo sin audio.
         audioTimer = setTimeout(() => {
@@ -40,6 +43,8 @@
     }
   }
 
+  $('bStats').classList.toggle('sel', store.get('directoStats', '0') === '1');
+  $('bStats').onclick = () => { const on = store.get('directoStats', '0') !== '1'; store.set('directoStats', on ? '1' : '0'); $('bStats').classList.toggle('sel', on); arrancar(); };
   $('cHd').onclick = () => { stream = 0; arrancar(); };
   $('cSd').onclick = () => { stream = 1; arrancar(); };
   $('bAudio').onclick = () => {

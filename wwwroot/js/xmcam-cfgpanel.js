@@ -84,6 +84,8 @@ window.XmConfig = (function(){
       const desc = XmDic.descripcion(name, last, x.orig), vals = XmDic.valores(name, last, x.orig, esBool ? 'bool' : tipo);
       const info = `<div class="h">${esc(desc)}</div><div class="v">Valores: ${esc(vals)}</div>`;
       if (V && !esBool && V.necesitaWidget(tipo)) return `<div class="cfg-f" title="${esc(k0)}"><div class="tx"><div class="t">${esc(etq)}</div>${info}</div><div class="ctl">${V.widget(tipo, k0, x.orig)}</div></div>`;
+      const ops = !esBool && !/^No editable/.test(vals) ? XmDic.opciones(name, last, x.orig) : null;   // enumeración → desplegable
+      if (ops) return `<div class="cfg-f" title="${esc(k0)}"><div class="tx"><div class="t">${esc(etq)}</div>${info}</div><div class="ctl"><select class="inp" data-k="${k0}">${ops.map(o => `<option value="${esc(o[0])}" ${String(o[0]) === String(x.orig) ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select></div></div>`;
       const ro = /^No editable/.test(vals);   // MAC, estado, capacidad…: se muestran pero no se editan
       const ctl = ro ? `<b>${esc(x.orig)}</b>` : control(x, { t: esBool ? 'toggle' : 'str' }, '—');
       const p = esBool ? '' : pista(last, x.orig);

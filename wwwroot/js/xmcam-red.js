@@ -34,9 +34,10 @@
     if (t === 'bool') ctl = `<label class="switch"><input type="checkbox" data-r="${n}" ${S.toBool(v) ? 'checked' : ''}><i></i></label>`;
     else if (t === 'ip'){ const hex = typeof v === 'string' && /^0x/i.test(v); ctl = `<input class="inp" type="text" inputmode="decimal" data-r="${n}" value="${esc(hex ? V.ipDeHex(v) : v)}" ${dis ? 'disabled' : ''} placeholder="0.0.0.0"><div class="small bad" hidden>IP no válida</div>`; }
     else if (t === 'num') ctl = `<input class="inp" type="number" inputmode="numeric" data-r="${n}" value="${esc(v)}">`;
+    else if (t === 'sel'){ const ops = XmDic.opciones(BLQ[blk] || blk, key, v) || []; ctl = `<select class="inp" data-r="${n}">${ops.map(o => `<option value="${esc(o[0])}" ${String(o[0]) === String(v) ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`; }
     else if (t === 'ro') ctl = `<b>${esc(v)}</b>`;
     else ctl = `<input class="inp" type="${t === 'pass' ? 'password' : 'text'}" data-r="${n}" value="${esc(v)}" autocomplete="off">`;
-    const vals = window.XmDic ? XmDic.valores(BLQ.common, key, v, t === 'ip' ? 'iphex' : t === 'bool' ? 'bool' : t === 'num' ? 'num' : 'str') : '';
+    const vals = window.XmDic ? XmDic.valores(BLQ[blk] || BLQ.common, key, v, t === 'ip' ? 'iphex' : t === 'bool' ? 'bool' : t === 'num' ? 'num' : 'str') : '';
     return `<div class="cfg-f${t === 'bool' ? ' tog' : ''}${dis ? ' dim' : ''}"><div class="tx"><div class="t">${label}</div>${help ? `<div class="h">${help}</div>` : ''}${t === 'ro' || !vals ? '' : `<div class="v">Valores: ${esc(vals)}</div>`}</div><div class="ctl">${ctl}</div></div>`;
   }
   const tarjeta = (tit, filas) => filas.join('') ? `<div class="h2">${tit}</div><div class="cfg-card">${filas.join('')}</div>` : '';
@@ -65,6 +66,8 @@
     h += tarjeta('Wi‑Fi', [
       campo('wifi', w, ['Enable'], 'Wi‑Fi activado', '', 'bool'),
       campo('wifi', w, ['SSID'], 'Nombre de la red', '', 'str'),
+      campo('wifi', w, ['AuthMode'], 'Seguridad (autenticación)', 'Tipo de protección de tu router. Debe coincidir con el de la red a la que se conecta.', 'sel'),
+      campo('wifi', w, ['EncrypType'], 'Cifrado', 'Algoritmo de cifrado de la red; con WPA2 lo habitual es AES.', 'sel'),
       campo('wifi', w, ['Keys', 'Key', 'Password'], 'Contraseña', '', 'pass'),
       campo('dhcp', wl, ['Enable'], 'Wi‑Fi: DHCP', 'La IP de la conexión Wi‑Fi la da el router.', 'bool'),
       campo('wifi', w, ['HostIP'], 'Wi‑Fi: dirección IP', '', 'ip', wifiDhcp),

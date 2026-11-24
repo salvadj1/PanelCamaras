@@ -144,6 +144,46 @@ window.XmDic = (function(){
     RemainSpace: ['Espacio libre', 'Espacio libre de la tarjeta (solo lectura).', 'No editable (MB)']
   };
 
+
+  /**
+   * Enumeraciones conocidas: clave (o "Bloque|Clave") → lista [valor, etiqueta en español].
+   * Se usan para mostrar un desplegable. El valor actual de la cámara se añade siempre si no está en la lista,
+   * así un firmware con valores distintos nunca pierde su configuración.
+   */
+  const E = {
+    AuthMode: [['OPEN', 'Abierta (sin contraseña)'], ['SHARED', 'WEP (clave compartida)'], ['WEPAUTO', 'WEP automático'], ['WPA', 'WPA'], ['WPAPSK', 'WPA-PSK'], ['WPA2', 'WPA2'], ['WPA2PSK', 'WPA2-PSK'], ['WPAPSKWPA2PSK', 'WPA/WPA2 mixto']],
+    EncrypType: [['NONE', 'Sin cifrado'], ['WEP', 'WEP'], ['TKIP', 'TKIP'], ['AES', 'AES (CCMP, el más seguro)']],
+    Compression: [['H.264', 'H.264'], ['H.265', 'H.265 (HEVC, ocupa menos)'], ['MJPG', 'MJPEG']],
+    BitRateControl: [['CBR', 'Caudal constante (CBR)'], ['VBR', 'Caudal variable (VBR)']],
+    VideoOutPut: [['PAL', 'PAL'], ['NTSC', 'NTSC']],
+    OverWrite: [['OverWrite', 'Sobrescribir lo más antiguo'], ['StopRecord', 'Parar de grabar']],
+    RecordMode: [['ConfigRecord', 'Según horario'], ['ManualRecord', 'Grabar siempre'], ['ClosedRecord', 'Apagada']],
+    Parity: [['None', 'Ninguna'], ['Odd', 'Impar'], ['Even', 'Par']],
+    Protocol: [['PELCOD', 'Pelco-D'], ['PELCOP', 'Pelco-P']],
+    DateFormat: [['YYMMDD', 'Año-Mes-Día'], ['MMDDYY', 'Mes-Día-Año'], ['DDMMYY', 'Día-Mes-Año']],
+    DateSeparator: [['-', 'Guion ( - )'], ['/', 'Barra ( / )'], ['.', 'Punto ( . )']],
+    TimeFormat: [['24', '24 horas'], ['12', '12 horas (AM/PM)']],
+    DSTRule: [['Off', 'Sin cambio de hora'], ['On', 'Cambio de hora verano/invierno']],
+    AutoRebootDay: [['Never', 'Nunca'], ['Everyday', 'Cada día'], ['Monday', 'Lunes'], ['Tuesday', 'Martes'], ['Wednesday', 'Miércoles'], ['Thursday', 'Jueves'], ['Friday', 'Viernes'], ['Saturday', 'Sábado'], ['Sunday', 'Domingo']],
+    TransferPlan: [['AutoAdapt', 'Automático'], ['Quality', 'Priorizar calidad'], ['Fluency', 'Priorizar fluidez']],
+    Resolution: [['1080P', '1080P (1920×1080)'], ['720P', '720P (1280×720)'], ['960H', '960H'], ['D1', 'D1 (704×576)'], ['HD1', 'HD1'], ['CIF', 'CIF (352×288)'], ['QCIF', 'QCIF'], ['3M', '3 Mpx'], ['4M', '4 Mpx'], ['5M', '5 Mpx'], ['1_3M', '1,3 Mpx']],
+    Quality: [[1, '1 – Más baja'], [2, '2 – Baja'], [3, '3 – Media'], [4, '4 – Buena'], [5, '5 – Muy buena'], [6, '6 – Máxima']],
+    FPS: [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6'], [8, '8'], [10, '10'], [12, '12'], [15, '15'], [20, '20'], [25, '25'], [30, '30']],
+    'Alarm.MotionDetect|Level': [[1, '1 – Muy baja'], [2, '2'], [3, '3 – Media'], [4, '4'], [5, '5'], [6, '6 – Muy alta']]
+  };
+  /** Opciones [valor, etiqueta] para un desplegable, o null si el ajuste no es una enumeración. v = valor actual (se añade si falta). */
+  function opciones(blq, last, v){
+    const b = String(blq || '').replace(/\.\[0\]$/, '');
+    const o = E[b + '|' + last] || E[last]; if (!o) return null;
+    if (typeof v === 'object' && v !== null) return null;
+    const r = o.slice(); if (v !== undefined && v !== null && !r.some(x => String(x[0]) === String(v))) r.push([v, String(v) + ' (valor actual)']);
+    return r;
+  }
+
+  /** Nombres en español de los bloques de configuración más comunes. */
+  const G = { 'NetWork.NetCommon': 'red básica', 'NetWork.NetDHCP': 'DHCP', 'NetWork.NetDNS': 'DNS', 'NetWork.Wifi': 'Wi‑Fi', 'NetWork.NetNTP': 'hora por internet (NTP)', 'NetWork.NetEmail': 'correo electrónico', 'NetWork.FTP': 'FTP', 'NetWork.NetDDNS': 'DDNS',
+    'Simplify.Encode': 'codificación de vídeo', 'Camera.Param': 'imagen de la cámara', 'Camera.ParamEx': 'imagen avanzada', 'Alarm.MotionDetect': 'detección de movimiento', 'Alarm.BlindDetect': 'ocultación de la imagen', 'Alarm.LossDetect': 'pérdida de vídeo',
+    'Record': 'grabación', 'General.General': 'sistema', 'General.Location': 'idioma y formato', 'General.AutoMaintain': 'mantenimiento automático', 'Uart.PTZ': 'motor PTZ', 'fVideo.OSDInfo': 'rótulos en pantalla', 'AVEnc.VideoColor': 'color del vídeo' };
   /** Palabras sueltas para traducir claves que no están en el diccionario ("AlarmOutLatch" → "Alarma Salida Duración"). */
   const W = { Enable: 'activar', Disable: 'desactivar', Alarm: 'alarma', Out: 'salida', In: 'entrada', Mask: 'canales', Latch: 'duración', Time: 'hora', Section: 'horario', Record: 'grabación',
     Snap: 'foto', Snapshot: 'foto', Mail: 'email', Message: 'mensaje', Event: 'evento', Handler: 'acciones', Detect: 'detección', Motion: 'movimiento', Human: 'persona', Blind: 'ocultación',
@@ -186,13 +226,20 @@ window.XmDic = (function(){
     if (/Mask$/.test(s)) return 'Indica a qué canales (cámaras) se aplica. Ninguno marcado = a ninguno.';
     if (/Latch$/.test(s)) return 'Tiempo que se mantiene activo tras el evento.';
     if (/Port$/.test(s)) return 'Puerto de red usado por este servicio.';
-    if (/(Time|Period|Interval|Delay)/.test(s)) return 'Parámetro de tiempo de la cámara.';
-    if (/(IP|Addr|Address|Gateway|GateWay)$/.test(s)) return 'Dirección de red.';
-    if (/Name$/.test(s)) return 'Nombre o identificador.';
-    return 'Ajuste técnico del fabricante. Si no sabes qué hace, mejor no lo cambies.';
+    if (/(Time|Period|Interval|Delay)/.test(s)) return `Parámetro de tiempo de «${n}» (${grupoDe(blq)}).`;
+    if (/(IP|Addr|Address|Gateway|GateWay)$/.test(s)) return `Dirección de red de «${n}» (${grupoDe(blq)}).`;
+    if (/Name$/.test(s)) return `Nombre o identificador de «${n}».`;
+    const tv = typeof v === 'boolean' ? 'interruptor' : typeof v === 'number' ? 'número' : /^0x[0-9a-f]+$/i.test(String(v)) ? 'valor numérico en hexadecimal' : 'texto';
+    return `«${n}»: parámetro de ${grupoDe(blq)} (${tv}, actual: ${String(v).slice(0, 40) || 'vacío'}). No tiene descripción detallada para este modelo; si dudas, déjalo como está.`;
+  }
+  /** Nombre humano del bloque de configuración al que pertenece un ajuste (para descripciones contextuales). */
+  function grupoDe(blq){
+    const b = String(blq || '').replace(/\.\[0\]$/, '');
+    return (G[b] || b.split('.').map(traducir).join(' › ') || 'la cámara').toLowerCase();
   }
   /** Valores posibles: los de la entrada o, si no la hay, los deducidos del tipo del valor actual. */
   function valores(blq, last, v, tipo){
+    const en = opciones(blq, last, undefined); if (en) return 'Elige de la lista: ' + en.map(x => x[1]).join(' · ');
     const e = buscar(blq, last); if (e) return e[2];
     switch (tipo){
       case 'bool': return SN;
@@ -210,5 +257,5 @@ window.XmDic = (function(){
     const idx = path.filter((x, i) => /^\d+$/.test(String(x)) && i > 0).map(x => Number(x) + 1);
     return p.map((x, i) => i === p.length - 1 ? nombre(blq, x) : (D[x] ? D[x][0] : traducir(x))).join(' › ') + (idx.length ? ' ' + idx.join('.') : '');
   }
-  return { nombre, descripcion, valores, etiqueta, traducir, buscar, SN };
+  return { nombre, descripcion, valores, opciones, etiqueta, traducir, buscar, SN };
 })();
