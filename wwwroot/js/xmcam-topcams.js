@@ -12,9 +12,8 @@
     const path = location.pathname.replace(cur, nuevaId);
     if (/\/config\/?$/.test(path)) return path + location.search;                  // mismo bloque
     if (/\/sd\/?$/.test(path)) return path;                                        // grabaciones SD (sin hora concreta)
-    const pn = document.body.dataset.panel;                                        // directo: conserva Ajustes/Info
-    const bl = document.body.dataset.bloque;
-    return path + (pn === 'ajustes' || pn === 'info' ? '?panel=' + pn + (pn === 'ajustes' && bl !== undefined ? '&bloque=' + bl : '') : '');
+    const tb = document.body.dataset.tab, ct = document.body.dataset.cat;          // directo: conserva la pestaña y la categoría de ajustes
+    return path + (tb && tb !== 'camaras' ? '?tab=' + tb + (tb === 'ajustes' && ct ? '&cat=' + ct : '') : '');
   }
   fetch('/api/camaras').then(r => r.json()).then(r => {
     const cams = r.camaras || []; if (!cams.length) return;

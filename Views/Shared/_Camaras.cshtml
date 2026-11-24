@@ -18,12 +18,14 @@
     var t = localStorage.getItem('xm.theme') || 'NVR_DARK';
     var f = localStorage.getItem('xm.follow'); f = (f === null) ? true : f === 'true';
     var dark = matchMedia('(prefers-color-scheme: dark)').matches;
-    var D = { NVR_DARK: 1, AMOLED: 1, CYBER: 1 };
+    var D = { NVR_DARK: 1, AMOLED: 1, CYBER: 1, VISOR: 1, ATARDECER: 1, CONSOLA: 1, OCEANO: 1, CONTRASTE: 1 };   // temas oscuros
     var r = !f ? t : (!!D[t] === dark ? t : (dark ? 'NVR_DARK' : 'MATERIAL_LIGHT'));
     document.documentElement.setAttribute('data-theme', r);
   } catch (e) {} })();
 </script>
 <link rel="stylesheet" href="~/css/xmcam.css">
+<link rel="stylesheet" href="~/css/xmcam-temas.css">
+@if (ViewData["Cam"] != null) { <link rel="stylesheet" href="~/css/xmcam-hoja.css"> }
 </head>
 <body class="@clsBody">
 <header class="topbar">

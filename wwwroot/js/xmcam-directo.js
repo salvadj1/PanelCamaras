@@ -18,12 +18,24 @@
     clearInterval(snapTimer); clearTimeout(audioTimer);
   }
 
+  let pausado = false;
+  /** Avisa a los controles transparentes (xmcam-overlay.js) del estado del directo. */
+  const avisa = () => document.dispatchEvent(new CustomEvent('xm:directo', { detail: { stream, audio, pausado } }));
+  /** Pausa: deja el último fotograma en pantalla y corta la conexión para no gastar red. */
+  function pausar(){
+    try { const v = $('vid'), c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight; c.getContext('2d').drawImage(v, 0, 0); $('snap').src = c.toDataURL('image/jpeg', 0.85); } catch (_) {}
+    pausado = true; parar(); $('vid').hidden = true; $('snap').hidden = false; setEstado('En pausa'); avisa();
+  }
+  /** Continuar: vuelve al directo (borde en vivo), no a donde se pausó. */
+  function reanudar(){ pausado = false; setEstado(''); arrancar(); }
+  window.XmDirecto = { pausar, reanudar, enPausa: () => pausado };
+
   /** Arranca el directo con la calidad/audio actuales (o capturas si no hay motor de vídeo). */
   function arrancar(){
-    parar();
+    parar(); pausado = false;
     $('bQ').textContent = stream === 0 ? 'HD' : 'SD';
     $('cHd').classList.toggle('sel', stream === 0); $('cSd').classList.toggle('sel', stream === 1);
-    $('bAudio').textContent = audio ? 'Audio' : 'Sin audio';
+    $('bAudio').textContent = audio ? 'Audio' : 'Sin audio'; avisa();
     if (video.disponible && XmLive.soportado()){
       $('vid').hidden = false; $('snap').hidden = true; $('vid').muted = !audio;
       live = new XmLive($('vid'), srcName(), { onFrame: () => setEstado(''), onState: setEstado });
@@ -140,7 +152,7 @@
   }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden){ Ptz.set(null, 0); parar(); }
-    else { arrancar(); pedirWake(); }
+    else if (!pausado){ arrancar(); pedirWake(); }
   });
   window.addEventListener('pagehide', () => { Ptz.set(null, 0); parar(); try { wake && wake.release(); } catch (_) {} });
 

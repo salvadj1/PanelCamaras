@@ -60,7 +60,14 @@ const XM = (() => {
     { id: 'MATERIAL_LIGHT', label: 'Material You claro', desc: 'Fondo claro, tarjetas redondeadas y acento violeta.', dark: false, c: '#6750a4' },
     { id: 'AMOLED', label: 'AMOLED negro', desc: 'Negro puro: ahorra batería en pantallas OLED.', dark: true, c: '#8ab4f8' },
     { id: 'CYBER', label: 'Cyber verde', desc: 'Fondo casi negro con acento verde neón, estilo seguridad.', dark: true, c: '#00ff9c' },
-    { id: 'MINIMAL', label: 'Minimal blanco', desc: 'Blanco y gris con mucho aire. Sobrio y limpio.', dark: false, c: '#111111' }
+    { id: 'MINIMAL', label: 'Minimal blanco', desc: 'Blanco y gris con mucho aire. Sobrio y limpio.', dark: false, c: '#111111' },
+    { id: 'VISOR', label: 'Visor', desc: 'Negro con turquesa, esquinas muy redondeadas. Aspecto de app de cámaras.', dark: true, c: '#2ee6c5' },
+    { id: 'ATARDECER', label: 'Atardecer', desc: 'Marrón oscuro cálido con acento naranja y botones tipo píldora.', dark: true, c: '#ff7a3d' },
+    { id: 'CONSOLA', label: 'Consola', desc: 'Gris verdoso con lima, esquinas rectas y títulos monoespaciados.', dark: true, c: '#b6f03c' },
+    { id: 'OCEANO', label: 'Océano', desc: 'Azul marino profundo con acento celeste.', dark: true, c: '#38bdf8' },
+    { id: 'CONTRASTE', label: 'Alto contraste', desc: 'Negro y amarillo, bordes gruesos y letra mayor. Máxima legibilidad.', dark: true, c: '#ffd600' },
+    { id: 'PAPEL', label: 'Papel', desc: 'Crema cálido con acento teja y títulos con serifa. Suave para leer.', dark: false, c: '#9a3412' },
+    { id: 'MENTA', label: 'Menta', desc: 'Claro con verdes suaves y botones redondeados.', dark: false, c: '#0f766e' }
   ];
   /** Tema efectivo (misma lógica que resolveTheme de la app). */
   function resolveTheme(){

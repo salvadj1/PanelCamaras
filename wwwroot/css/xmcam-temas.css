@@ -1,0 +1,22 @@
+/* ===== 036: temas con estilo propio =====
+ * Cada tema define colores (los mismos nombres que en xmcam.css) y, además, la "forma" de la interfaz:
+ *   --r  radio de tarjetas y paneles · --rb radio de botones · --font tipografía · --fh tipografía de títulos.
+ * Solo se usan tipografías del sistema (el panel funciona sin internet). */
+:root{--r:12px;--rb:20px;--font:system-ui,"Segoe UI",Roboto,sans-serif;--fh:var(--font);--bw:1px}
+[data-theme=VISOR]{--primary:#2ee6c5;--on-primary:#04211c;--primary-container:#0f3d37;--on-primary-container:#b8fff2;--secondary-container:#1a2330;--on-secondary-container:#c9f6ee;--bg:#0a0d12;--fg:#eef2f8;--surface-variant:#12161d;--on-surface-variant:#8b95a7;--outline:#242b38;--error:#ff5468;--r:18px;--rb:14px;--font:"Inter","Segoe UI",system-ui,sans-serif;--fh:"Space Grotesk","Segoe UI",system-ui,sans-serif}
+[data-theme=ATARDECER]{--primary:#ff7a3d;--on-primary:#1c0900;--primary-container:#4a2410;--on-primary-container:#ffd9c4;--secondary-container:#2a2118;--on-secondary-container:#ffdcc8;--bg:#120d0a;--fg:#f4efe9;--surface-variant:#1c1612;--on-surface-variant:#a89a8d;--outline:#33291f;--error:#ff5a6a;--r:22px;--rb:999px;--font:"Manrope","Segoe UI",system-ui,sans-serif}
+[data-theme=CONSOLA]{--primary:#b6f03c;--on-primary:#141c00;--primary-container:#2f4310;--on-primary-container:#dcff9a;--secondary-container:#1c2018;--on-secondary-container:#d6efb0;--bg:#0d0f0c;--fg:#eaf0e3;--surface-variant:#151813;--on-surface-variant:#8f9a85;--outline:#272c22;--error:#ff6359;--r:8px;--rb:8px;--font:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;--fh:"IBM Plex Mono",ui-monospace,Consolas,monospace}
+[data-theme=OCEANO]{--primary:#38bdf8;--on-primary:#00202e;--primary-container:#0b3a55;--on-primary-container:#c6ecff;--secondary-container:#12263a;--on-secondary-container:#cde8fb;--bg:#07121c;--fg:#e4f1fb;--surface-variant:#0e1c2b;--on-surface-variant:#7f9bb3;--outline:#1b3248;--error:#fb7185;--r:14px;--rb:12px}
+[data-theme=PAPEL]{--primary:#9a3412;--on-primary:#fff;--primary-container:#fde4d2;--on-primary-container:#4a1a05;--secondary-container:#efe6d6;--on-secondary-container:#3b2a14;--bg:#faf6ee;--fg:#2a241b;--surface-variant:#f1eadc;--on-surface-variant:#6f6552;--outline:#d9ccb4;--error:#b3261e;--r:6px;--rb:6px;--fh:Georgia,"Times New Roman",serif}
+[data-theme=CONTRASTE]{--primary:#ffd600;--on-primary:#000;--primary-container:#333000;--on-primary-container:#fff59d;--secondary-container:#1a1a1a;--on-secondary-container:#fff;--bg:#000;--fg:#fff;--surface-variant:#0d0d0d;--on-surface-variant:#d0d0d0;--outline:#8a8a8a;--error:#ff5252;--r:4px;--rb:4px;--bw:2px}
+[data-theme=MENTA]{--primary:#0f766e;--on-primary:#fff;--primary-container:#ccfbf1;--on-primary-container:#042f2e;--secondary-container:#d9f2ec;--on-secondary-container:#0b3b36;--bg:#f3faf8;--fg:#10231f;--surface-variant:#e6f4f0;--on-surface-variant:#4d6b65;--outline:#bfdad3;--error:#b91c1c;--r:20px;--rb:999px}
+/* aplicar la forma */
+body.xm{font-family:var(--font)}
+h1,h2,h3,.sec,.logo,.hoja-t{font-family:var(--fh)}
+.card,.cfg-card,.blk-it,.tile,.sdc,.summary,.themecard,.hoja .lst,.hoja .ccard,dialog{border-radius:var(--r)}
+.btn,.chip.sel{border-radius:var(--rb)}
+.chip{border-radius:min(var(--rb),14px)}
+.card,.cfg-card,.blk-it,.hoja .lst{border:var(--bw) solid color-mix(in srgb,var(--outline) 70%,transparent)}
+[data-theme=CONTRASTE] body.xm{font-size:16px}
+[data-theme=CONTRASTE] .chip,[data-theme=CONTRASTE] .btn.out,[data-theme=CONTRASTE] .inp{border-width:2px;border-color:#bbb}
+[data-theme=CONTRASTE] .rail .gnav .ib.on{outline:2px solid var(--primary)}

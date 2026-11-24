@@ -137,7 +137,7 @@
     if (cambiaIp || pasaADhcp || conexionPerdida){
       toast('Aplicado. Buscando la cámara…');
       const ip = await reconectar(cambiaIp ? ipNueva : null);
-      if (ip){ toast('Cámara actualizada en ' + ip); setTimeout(() => { location.href = `/camara/${id}?panel=ajustes`; }, 1200); }
+      if (ip){ toast('Cámara actualizada en ' + ip); setTimeout(() => { location.href = `/camara/${id}?tab=ajustes&cat=net`; }, 1200); }
       else toast('No encuentro la cámara. Búscala por su MAC en «Conexión → Buscar en la red».');
     } else { toast('Red guardada'); cargar(); }
   }

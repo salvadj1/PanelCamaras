@@ -1,25 +1,11 @@
 /**
- * Pestañas Ajustes e Info de una cámara (equivale a SettingsScreen.kt y CameraInfoPanel.kt).
- * Cambia entre paneles sin recargar y gestiona nombre, vigilancia, hash RTSP, bloques de configuración,
- * sincronizar hora y reinicio.
+ * Panel "Más" y resumen de una cámara (equivale a CameraInfoPanel.kt): nombre, vigilancia, hash RTSP, conexión,
+ * sincronizar hora, reinicio y eliminar. (La navegación por pestañas y las categorías de ajustes están en xmcam-hoja.js.)
  */
 (function(){
   const { $, esc, api, toast, confirmar, pedirTexto } = XM;
   const id = $('player').dataset.cam;
-  const P = { directo: $('pDirecto'), ajustes: $('pAjustes'), info: $('pInfo') };
   let cam = null, infoCargada = false;
-
-  /** Muestra un panel; el vídeo se detiene al salir del directo para no gastar red. */
-  function ir(p){
-    document.body.dataset.panel = p;   // lo lee la barra de cámaras para conservar la sección al cambiar de cámara
-    Object.keys(P).forEach(k => P[k].hidden = k !== p);
-    $('tabs').querySelectorAll('[data-p]').forEach(a => a.classList.toggle('sel', a.dataset.p === p));
-    $('sheet').classList.toggle('sinptz', p !== 'directo');
-    document.querySelector('.cambody').classList.toggle('fuera', p !== 'directo');
-    $('camfuera').hidden = p !== 'ajustes'; $('tabs').hidden = p === 'ajustes';   // en Ajustes: botón «Directo» en vez de los 4 iconos
-    if ((p === 'info' || p === 'ajustes') && !infoCargada) cargarInfo();
-  }
-  $('tabs').querySelectorAll('[data-p]').forEach(a => a.onclick = e => { e.preventDefault(); ir(a.dataset.p); });
 
   const lista = () => api('/api/camaras').then(r => r.camaras.find(c => c.id === id));
   const patch = body => api('/api/camaras/' + id, 'PATCH', body);
@@ -32,21 +18,6 @@
       .map(([k, v]) => `<div class="setrow" style="padding:4px 0"><div class="mut">${k}</div><div>${esc(v)}</div></div>`).join('');
   }
 
-  /** Lista de bloques de la cámara como tarjetas desplegables: al abrir una se monta el editor en el mismo sitio (solo una abierta). */
-  $('bloques').innerHTML = XmSchemas.BLOCKS.map(([t, d], i) =>
-    `<div class="blk-it" data-i="${i}"><button class="blk" type="button" aria-expanded="false"><span class="bt"><span>${esc(t)}</span><span class="mut">${esc(d)}</span></span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="blk-body" hidden></div></div>`).join('');
-  $('bloques').querySelectorAll('.blk-it').forEach(it => it.querySelector('.blk').onclick = () => {
-    const abrir = it.querySelector('.blk-body').hidden;
-    $('bloques').querySelectorAll('.blk-it').forEach(o => { o.classList.remove('open'); o.querySelector('.blk-body').hidden = true; o.querySelector('.blk').setAttribute('aria-expanded', 'false'); });
-    if (!abrir){ delete document.body.dataset.bloque; return; }
-    document.body.dataset.bloque = it.dataset.i;   // lo lee la barra de cámaras para abrir el mismo bloque al cambiar de cámara
-    it.classList.add('open'); it.querySelector('.blk-body').hidden = false; it.querySelector('.blk').setAttribute('aria-expanded', 'true');
-    if (!it.dataset.listo){   // el editor se crea la primera vez que se abre
-      it.dataset.listo = '1'; const [, , n, f] = XmSchemas.BLOCKS[+it.dataset.i];
-      XmConfig.mount(it.querySelector('.blk-body'), { id, name: n, filter: f || null, titulo: false });
-    }
-    if (it.scrollIntoView) it.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  });
   $('bloqueIr').onclick = () => { const n = $('bloqueOtro').value.trim(); if (n) location.href = `/camara/${id}/config?name=${encodeURIComponent(n)}`; };
 
   $('cVigilar').onchange = async e => { try { await patch({ vigilar: e.target.checked }); } catch (x) { toast(x.message); e.target.checked = !e.target.checked; } };
@@ -85,9 +56,6 @@
     } catch (x) { $('iSis').textContent = x.message; pintarResumen(null); }
   }
 
-  // ---- Ajustes: botón para volver al directo (las cámaras están en la barra superior)
-  $('cfVolver').onclick = () => ir('directo');
-
   // ---- Conexión: cambiar IP/puertos/credenciales sin volver a añadir la cámara
   const num = (el, def) => parseInt($(el).value) || def;
   function rellenarForm(){
@@ -122,7 +90,5 @@
   };
 
   lista().then(c => { cam = c; if (cam){ pintarCamara(); rellenarForm(); } }).catch(() => {});
-  const qp = new URLSearchParams(location.search), q = qp.get('panel'); if (P[q]) ir(q);
-  // al cambiar de cámara se reabre el mismo bloque (para comparar ajustes entre cámaras)
-  const qb = qp.get('bloque'), itb = qb !== null && $('bloques').querySelector(`.blk-it[data-i="${+qb}"] .blk`); if (itb) setTimeout(() => itb.click(), 60);
+  cargarInfo();   // resumen y datos del sistema (se usan en Ajustes y en Más)
 })();
