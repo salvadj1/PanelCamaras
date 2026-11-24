@@ -1,0 +1,10 @@
+035 - Vídeo fluido y ajustes con desplegables y descripciones
+
+Views/Camaras/Directo.cshtml: botón "Estadísticas" junto a HD/SD.
+wwwroot/css/xmcam.css: estilo del panel .livestats.
+wwwroot/js/xmcam-live.js: búfer MSE seguro (recorta sin cortar dependencias de keyframe), salto de huecos, ajuste de velocidad suave, contador de cortes y panel de estadísticas.
+wwwroot/js/xmcam-mosaico.js: calidad automática (HD solo con 1-2 cámaras, SD si hay más), menú Vista con calidad y estadísticas, pausa del vídeo con la pestaña oculta.
+wwwroot/js/xmcam-directo.js: botón y panel de estadísticas en el directo.
+wwwroot/js/xmcam-diccionario.js: tabla de enumeraciones (XmDic.opciones: Wi-Fi AuthMode/EncrypType, códec, CBR/VBR, resolución, calidad, formatos de fecha, etc.), lista de valores en la ayuda y descripciones contextuales (ya no son todas iguales).
+wwwroot/js/xmcam-cfgpanel.js: desplegables en Avanzado para parámetros enumerados; el valor actual siempre se conserva.
+wwwroot/js/xmcam-red.js: desplegables de seguridad y cifrado Wi-Fi.

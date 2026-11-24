@@ -41,7 +41,7 @@
   }
   let cols = columnas();
 
-  function pararTodos(){ players.forEach(p => p.stop()); players.clear(); }
+  function pararTodos(){ players.forEach(p => { if (p.statsOff) p.statsOff(); p.stop(); }); players.clear(); }
 
   /** Dibuja el mosaico completo (solo cuando cambian cámaras, distribución o cámara principal). */
   function render(){
@@ -79,10 +79,10 @@
       : 'Toca una cámara para abrir el directo · mantén pulsado para borrarla.';
   }
 
-  /** Stream de las casillas: "hd" o "sd". Ajuste "auto" (por defecto): HD hasta 4 cámaras, SD con más para no saturar red ni CPU. */
+  /** Stream de las casillas: "hd" o "sd". Ajuste "auto" (por defecto): HD solo con 1-2 cámaras, SD con más para no saturar red ni CPU; se puede forzar desde el menú Vista. */
   function calidadMosaico(){
     const q = store.get('mosaicoQ', 'auto');
-    return q === 'hd' || q === 'sd' ? q : (cams.length <= 4 ? 'hd' : 'sd');
+    return q === 'hd' || q === 'sd' ? q : (cams.length <= 2 ? 'hd' : 'sd');   // automático: varias cámaras en HD saturan CPU y red
   }
 
   /** Actualiza puntos de estado, vídeo en directo y resumen sin redibujar. */
@@ -95,11 +95,12 @@
       const t = tiles.get(c.id); if (!t) return;
       t.dot.className = 'dot ' + (c.online === true ? 'on' : c.online === false ? 'off' : '');
       t.nopic.textContent = c.online === false ? 'Sin conexión' : 'Sin vista previa';
-      const quiere = c.online === true && t.live && video.disponible && XmLive.soportado();
+      const quiere = c.online === true && t.live && video.disponible && XmLive.soportado() && !document.hidden;   // con la pestaña oculta no se decodifica
       if (quiere && !players.has(c.id)){
         t.vid.hidden = false;
         const p = new XmLive(t.vid, c.id + '_' + calidadMosaico(), { onFrame: () => { t.img.hidden = true; t.nopic.hidden = true; } });
         players.set(c.id, p); p.start();
+        if (store.get('mosaicoStats', '0') === '1') p.statsOff = XmLive.panel(p, t.vid.parentElement, true);
       } else if (!quiere && players.has(c.id)){
         players.get(c.id).stop(); players.delete(c.id); t.vid.hidden = true;
         if (t.img.src) t.img.hidden = false;
@@ -131,8 +132,15 @@
   // Menú "Vista"
   const menu = $('menuVista');
   function pintaMenu(){
-    menu.innerHTML = LAYOUTS.map((l, i) => `<button class="btn txt" style="display:block;width:100%;text-align:left" data-i="${i}" type="button">${i === layout ? '✓ ' : '&nbsp;&nbsp;&nbsp;'}${esc(l.label)}</button>`).join('');
+    const q = store.get('mosaicoQ', 'auto'), st = store.get('mosaicoStats', '0') === '1';
+    const bt = (attr, txt) => `<button class="btn txt" style="display:block;width:100%;text-align:left" ${attr} type="button">${txt}</button>`;
+    menu.innerHTML = LAYOUTS.map((l, i) => bt(`data-i="${i}"`, (i === layout ? '✓ ' : '&nbsp;&nbsp;&nbsp;') + esc(l.label))).join('')
+      + '<div class="small mut" style="padding:8px 8px 2px">Calidad de las casillas</div>'
+      + [['auto', 'Automática (HD con 1-2 cámaras)'], ['sd', 'SD (más fluido)'], ['hd', 'HD (más detalle, más carga)']].map(x => bt(`data-q="${x[0]}"`, (q === x[0] ? '✓ ' : '&nbsp;&nbsp;&nbsp;') + x[1])).join('')
+      + '<div style="border-top:1px solid var(--outline);margin:6px 0"></div>' + bt('data-st="1"', (st ? '✓ ' : '&nbsp;&nbsp;&nbsp;') + 'Estadísticas de vídeo');
     menu.querySelectorAll('button').forEach(b => b.onclick = () => {
+      if (b.dataset.q){ store.set('mosaicoQ', b.dataset.q); menu.hidden = true; pararTodos(); aplicarEstado(); return; }
+      if (b.dataset.st){ store.set('mosaicoStats', st ? '0' : '1'); menu.hidden = true; pararTodos(); aplicarEstado(); return; }
       layout = +b.dataset.i; store.set('layout', layout); menu.hidden = true; render(); aplicarEstado(); previas();
     });
   }
@@ -143,6 +151,7 @@
   let rz = null;
   window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (columnas() !== cols){ render(); aplicarEstado(); previas(); } }, 200); });
   window.addEventListener('pagehide', pararTodos);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pararTodos(); aplicarEstado(); });
   (async () => {
     await refrescar(true);
     setTimeout(previas, 1500);

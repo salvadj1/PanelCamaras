@@ -164,10 +164,12 @@ const XmSchemas = (() => {
     BeepEnable: 'Pitido de la cámara', RecordLatch: 'Segundos extra de grabación', EventLatch: 'Pausa entre avisos',
     TimeSection: 'Horario (día y franja)', Region: 'Zona de detección', MotionArea: 'Zona de movimiento',
     TotalSpace: 'Capacidad total (MB)', RemainSpace: 'Espacio libre (MB)', Status: 'Estado', Name: 'Nombre', Port: 'Puerto',
-    UserName: 'Usuario', Password: 'Contraseña', SSID: 'Nombre de la red WiFi', Keys: 'Contraseña WiFi', Address: 'Dirección', Speed: 'Velocidad'
+    UserName: 'Usuario', Password: 'Contraseña', HostIP: 'Dirección IP', Submask: 'Máscara de subred', GateWay: 'Puerta de enlace', SpareAddress: 'DNS secundario',
+    AlarmOutMask: 'Salidas de alarma que activa', RecordMask: 'Canales que graban', SnapshotMask: 'Canales que hacen foto', MatrixMask: 'Canales de matriz', TourMask: 'Canales de ronda',
+    AlarmOutLatch: 'Duración de la salida de alarma', Dejitter: 'Antirrebote', AlarmInfo: 'Texto de la alarma', LogEnable: 'Guardar en el registro', MMSEnable: 'Enviar MMS', MatrixEnable: 'Activar matriz', ShortMsgEnable: 'Enviar SMS', TipEnable: 'Mostrar aviso en pantalla', TourEnable: 'Activar ronda', PtzEnable: 'Mover el PTZ', AlarmOutEnable: 'Activar salida de alarma', SSID: 'Nombre de la red WiFi', Keys: 'Contraseña WiFi', Address: 'Dirección', Speed: 'Velocidad'
   };
   /** Nombre legible de una clave técnica: usa el diccionario o separa las mayúsculas ("RecordEnable" → "Record Enable"). */
-  const friendly = last => FRIENDLY[last] || String(last).replace(/(?<=[a-z0-9])(?=[A-Z])/g, ' ');
+  const friendly = last => window.XmDic ? XmDic.nombre('', last) : (FRIENDLY[last] || String(last).replace(/(?<=[a-z0-9])(?=[A-Z])/g, ' '));
 
   // ---- ayudas de ruta JSON (compartidas)
   /** Convierte "A.B.0.C" en ["A","B",0,"C"]. */

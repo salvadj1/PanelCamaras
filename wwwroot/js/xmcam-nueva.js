@@ -12,7 +12,7 @@
     try {
       const lista = await api('/api/camaras/buscar', 'POST');
       $('hallados').innerHTML = lista.map((f, i) =>
-        `<button class="btn out" style="width:100%;margin-top:4px" data-i="${i}" type="button">${esc(f.nombre)}  ·  ${esc(f.ip)}</button>`).join('');
+        `<button class="btn out" style="width:100%;margin-top:4px;height:auto;padding:8px 12px;text-align:left" data-i="${i}" type="button"><div>${esc(f.nombre)}  ·  ${esc(f.ip)}</div><div class="small mut">${f.mac ? 'MAC ' + esc(f.mac) : ''}${f.serie ? '  ·  SN ' + esc(f.serie) : ''}</div></button>`).join('');
       $('hallados').querySelectorAll('button').forEach(x => x.onclick = () => {
         const f = lista[+x.dataset.i]; $('fHost').value = f.ip; $('fPuerto').value = f.puertoTcp; if (!val('fNombre')) $('fNombre').value = f.nombre;
       });

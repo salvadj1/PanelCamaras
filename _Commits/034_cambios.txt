@@ -1,0 +1,9 @@
+034 - Ajustes de cámara en español, con descripción y valores posibles
+
+wwwroot/js/xmcam-diccionario.js (nuevo): diccionario con unos 150 ajustes de cámaras XM (nombre en español, para qué sirve y valores que admite) y traductor de respaldo para los que no estén (palabras sueltas y descripción según su forma: Enable, Mask, Port, Time…).
+wwwroot/js/xmcam-cfgpanel.js: "Avanzado" usa nombres, descripciones y valores del diccionario; los campos del esquema muestran "Valores"; los valores de solo lectura (MAC, estado, capacidad) no se editan; las claves con índice (Horario 1.2) se describen bien.
+wwwroot/js/xmcam-schemas.js: los nombres de los mensajes salen del diccionario.
+wwwroot/js/xmcam-comparar.js: etiquetas en español en la comparación.
+wwwroot/js/xmcam-red.js: cada campo de red muestra sus valores posibles.
+Views/Camaras/Directo.cshtml, Views/Camaras/Config.cshtml: cargan el diccionario.
+wwwroot/css/xmcam.css: estilo de la línea "Valores".

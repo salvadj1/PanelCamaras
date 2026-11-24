@@ -1,0 +1,15 @@
+033 - Valores legibles, explorador de la cámara, red profesional, comparar cámaras y nuevo diseño (cámaras arriba)
+
+Controllers/CamarasApiController.cs: GET {id}/explorar (prueba unos 60 bloques y devuelve cuáles admite la cámara, con el JSON si completo=1) y POST {id}/red/comprobar (IP válida, misma subred, no usada). Imports de System.Net.
+Views/Shared/_Camaras.cshtml: cámaras en la barra superior; secciones en un raíl lateral (barra inferior en móvil).
+Views/Camaras/Directo.cshtml: secciones "Red" (red profesional) y "Herramientas"; carga los scripts nuevos.
+Views/Camaras/Config.cshtml: carga los scripts nuevos.
+wwwroot/js/xmcam-valores.js (nuevo): decodifica IPs hexadecimales, máscaras de canales, horarios y números hexadecimales y los escribe en el formato original.
+wwwroot/js/xmcam-cfgpanel.js: usa el decodificador en "Avanzado"; botones Deshacer (historial de 8 versiones) y Comparar.
+wwwroot/js/xmcam-comparar.js (nuevo): compara un bloque entre dos cámaras y copia los ajustes marcados en cualquier sentido (sin IP, MAC, Wi-Fi ni contraseñas).
+wwwroot/js/xmcam-red.js (nuevo): IP, máscara, puerta de enlace, DHCP, DNS, puertos, Wi-Fi e IPv6 con comprobaciones, confirmación y reconexión por MAC.
+wwwroot/js/xmcam-herramientas.js (nuevo): Analizar la cámara (bloques compatibles), Exportar e Importar copia de seguridad.
+wwwroot/js/xmcam-camajustes.js: al cambiar de cámara se reabre el mismo bloque.
+wwwroot/js/xmcam-topcams.js: conserva panel y bloque al cambiar de cámara.
+wwwroot/js/xmcam-schemas.js: nombres legibles para más claves.
+wwwroot/css/xmcam.css: estilos del raíl, comparador, widgets y acordeones.

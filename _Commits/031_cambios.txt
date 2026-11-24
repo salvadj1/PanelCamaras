@@ -1,0 +1,6 @@
+MAC en la busqueda de camaras y resumen al principio de Ajustes
+
+wwwroot/js/xmcam-nueva.js y xmcam-camajustes.js: los resultados de "Buscar en la red" muestran tambien la MAC y el numero de serie.
+Controllers/CamarasApiController.cs: /api/camaras/{id}/info devuelve ademas los datos de red de la camara (MAC, IP, mascara, puerta de enlace, nombre) leidos de NetWork.NetCommon.
+Views/Camaras/Directo.cshtml: tarjeta "Resumen" al principio de Ajustes.
+wwwroot/js/xmcam-camajustes.js: rellena el resumen (estado, direccion, MAC, mascara/puerta, modelo, firmware, numero de serie, usuario/canal); la MAC tambien aparece en Info.

@@ -26,9 +26,13 @@
       </div>
     </div>
 <div id="pAjustes" class="campanel" hidden>
+      <h2 class="sec">Resumen</h2>
+      <div class="card" id="aResumen" style="margin:10px 0">Cargando…</div>
       <h2 class="sec">En esta app</h2>
       <div class="setrow"><div><div>Vigilar alarmas de esta cámara</div><div class="mut small">El servidor escucha sus eventos aunque no tengas la web abierta.</div></div><label class="switch"><input type="checkbox" id="cVigilar"><i></i></label></div>
       <div class="setrow"><div><div>RTSP con hash XM</div><div class="mut small">Actívalo si el vídeo no abre con tu contraseña normal.</div></div><label class="switch"><input type="checkbox" id="cHash"><i></i></label></div>
+      <h2 class="sec">Red</h2>
+      <div id="redPro"></div>
       <h2 class="sec">Ajustes de la cámara</h2>
       <div id="bloques"></div>
       <div class="card" style="margin:10px 0"><div class="mut small">Otro bloque (avanzado)</div>
@@ -55,6 +59,8 @@
       </details>
       <h2 class="sec">Acciones</h2>
       <div class="row"><button class="btn tonal" id="bHora" type="button">Sincronizar hora</button><button class="btn tonal" id="bReinicio" type="button">Reiniciar cámara</button></div>
+      <h2 class="sec">Herramientas</h2>
+      <div id="herram" style="margin-bottom:10px"></div>
       <h2 class="sec">Zona delicada</h2>
       <div class="row" style="margin-bottom:14px"><button class="btn out dz" id="bEliminar" type="button">Eliminar cámara</button></div>
     </div>
@@ -65,7 +71,7 @@
     </div>
   </div>
   <section class="sheet" id="sheet" aria-label="Controles de la cámara">
-    <div id="camfuera" class="chips camsel" aria-label="Cambiar de cámara" hidden></div>
+    <div id="camfuera" class="chips camsel" hidden><button class="chip" id="cfVolver" type="button" title="Volver al directo">‹ Directo</button></div>
     <div class="tabs camtabs" id="tabs">
       <a href="#" class="sel" data-p="directo" title="Directo" aria-label="Directo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg></a>
       <a href="/camara/@ViewData["CamId"]/sd" title="Grabaciones de la SD" aria-label="Grabaciones de la SD"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/></svg></a>
@@ -79,6 +85,7 @@
         <span class="sp"></span>
         <button class="btn tonal" id="bAudio" type="button">Sin audio</button>
         <button class="btn tonal" id="bFoto" type="button">Foto</button>
+        <button class="chip" id="bStats" type="button" title="Códec, caudal, búfer y cortes del vídeo en directo">Estadísticas</button>
       </div>
       <div class="row" style="margin:2px 0" title="Z+ y Z− mueven el zoom de la cámara (óptico) o acercan la imagen en el navegador (digital)">
         <span class="small mut">Botones Z+ / Z−</span><span class="sp"></span>
@@ -105,6 +112,12 @@
   <script src="~/js/xmcam-joystick.js"></script>
   <script src="~/js/xmcam-schemas.js"></script>
   <script src="~/js/xmcam-dzoom.js"></script>
+  <script src="~/js/xmcam-diccionario.js"></script>
+  <script src="~/js/xmcam-valores.js"></script>
+  <script src="~/js/xmcam-comparar.js"></script>
+  <script src="~/js/xmcam-cfgpanel.js"></script>
   <script src="~/js/xmcam-directo.js"></script>
   <script src="~/js/xmcam-camajustes.js"></script>
+  <script src="~/js/xmcam-red.js"></script>
+  <script src="~/js/xmcam-herramientas.js"></script>
 }

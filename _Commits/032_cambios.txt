@@ -1,0 +1,10 @@
+032 - Ajustes de cámara: resumen compacto, tarjetas desplegables, Avanzado legible y cámaras en la barra superior
+
+Views/Shared/_Camaras.cshtml: la barra superior muestra las cámaras (chips) en todas las pantallas; se quita el título de página.
+Views/Camaras/Config.cshtml: quita la fila de cámaras propia; usa el componente reutilizable.
+Views/Camaras/Directo.cshtml: "‹ Directo" en Ajustes en lugar de la fila de cámaras; carga xmcam-cfgpanel.js.
+wwwroot/js/xmcam-topcams.js (nuevo): chips de cámaras; al cambiar de cámara conserva la sección (directo, Ajustes/Info, bloque de configuración, SD).
+wwwroot/js/xmcam-cfgpanel.js (nuevo): editor de bloque reutilizable (XmConfig.mount): secciones plegables, Avanzado agrupado por ruta con nombres legibles, pistas para máscaras y horarios, campos vacíos con "—".
+wwwroot/js/xmcam-config.js: reducido a montar el componente.
+wwwroot/js/xmcam-camajustes.js: Resumen en cuadrícula compacta con punto de estado; lista de bloques como tarjetas desplegables (una abierta a la vez, editor en el mismo sitio).
+wwwroot/css/xmcam.css: estilos nuevos; corrige el interruptor que medía 0 de ancho y se salía de la tarjeta.
